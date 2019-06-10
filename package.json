@@ -1,0 +1,35 @@
+{
+  "name": "smilep1",
+  "version": "1.0.0",
+  "description": "Node package to interface directly with Plugwise Smile P1 energy monitor devices (no Stretch or bridge required)",
+  "main": "smilep1.js",
+  "scripts": {
+    "test": "node test/test.js",
+    "generate-docs": "jsdoc --configure .jsdoc.json --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gruijter/smilep1.js.git"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "keywords": [
+    "Plugwise",
+    "Smile P1",
+    "energy",
+    "monitor",
+    "DSMR"
+  ],
+  "author": "Robin de Gruijter <gruijter@hotmail.com>",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/gruijter/smilep1.js/issues"
+  },
+  "homepage": "https://github.com/gruijter/smilep1.js#readme",
+  "runkitExampleFilename": "test/runkitTest.js",
+  "dependencies": {
+    "xml-js": "^1.6.11"
+  }
+}
