@@ -44,7 +44,7 @@ From the folder in which you installed the SmileP1 package, just run below comma
 			// fill in the ip address of the device, e.g. '192.168.1.50'
 			const options = { id='yourDeviceID', host='yourDeviceIP'}
 			await smile.login(options);
-			const powerInfo = await youless.getMeterReadings();
+			const powerInfo = await smile.getMeterReadings();
 			console.log(powerInfo);
 		} catch (error) {
 			console.log(error);

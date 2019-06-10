@@ -99,6 +99,7 @@ class SmileP1 {
 				readings.tm = powerTm;
 			}	catch (err) {
 				// console.log('Error parsing power information, or no power readings available');
+				console.log(result);
 			}
 			try {
 				const gas = Number(regexGas.exec(result)[1]);
@@ -107,6 +108,7 @@ class SmileP1 {
 				readings.gtm = gasTm;
 			}	catch (err) {
 				// console.log('Error parsing gas information, or no gas readings available');
+				console.log(result);
 			}
 			return Promise.resolve(readings);
 		} catch (error) {
@@ -133,43 +135,51 @@ class SmileP1 {
 			};
 			const json = parseXml.xml2js(result, parseOptions);
 			const logs = json.domain_objects.location.logs;
-			logs.cumulative_log.forEach((log) => {
-				if (log.type._text === 'electricity_consumed') {
-					powerOffpeak = log.period.measurement[0]._text / 1000;	// powerOffPeak
-					powerPeak = log.period.measurement[1]._text / 1000;	// powerPeak
-					powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
-				}
-				if (log.type._text === 'electricity_produced') {
-					powerOffpeakProduced = log.period.measurement[0]._text / 1000;	// powerOffpeakProduced
-					powerPeakProduced = log.period.measurement[1]._text / 1000;	// powerPeakProduced
-				}
-				if (log.type._text === 'gas_consumed') {
-					gas = log.period.measurement._text;	// gas
-					gasTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
-				}
-			});
-			logs.point_log.forEach((log) => {
-				if (log.type._text === 'electricity_consumed') {
-					if (Array.isArray(log.period.measurement)) {
-						measurePower = log.period.measurement[1]._text + log.period.measurement[0]._text;
-						if (log.period.measurement[0]._text !== 0) {
+			try {
+				logs.cumulative_log.forEach((log) => {
+					if (log.type._text === 'electricity_consumed') {
+						powerOffpeak = log.period.measurement[0]._text / 1000;	// powerOffPeak
+						powerPeak = log.period.measurement[1]._text / 1000;	// powerPeak
+						powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
+					}
+					if (log.type._text === 'electricity_produced') {
+						powerOffpeakProduced = log.period.measurement[0]._text / 1000;	// powerOffpeakProduced
+						powerPeakProduced = log.period.measurement[1]._text / 1000;	// powerPeakProduced
+					}
+					if (log.type._text === 'gas_consumed') {
+						gas = log.period.measurement._text;	// gas
+						gasTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
+						if (!gas) {
 							console.log(log);
 						}
-					} else { measurePower = log.period.measurement._text; }
-					// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
-					// readings.tm = Date.parse(new Date(powerTm));
-				}
-				if (log.type._text === 'electricity_produced') {
-					if (Array.isArray(log.period.measurement)) {
-						measurePowerProduced = log.period.measurement[1]._text + log.period.measurement[0]._text;
-						if (log.period.measurement[0]._text !== 0) {
-							console.log(log);
-						}
-					} else { measurePowerProduced = log.period.measurement._text; }
-					// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
-					// readings.tm = Date.parse(new Date(powerTm));
-				}
-			});
+					}
+				});
+				logs.point_log.forEach((log) => {
+					if (log.type._text === 'electricity_consumed') {
+						if (Array.isArray(log.period.measurement)) {
+							measurePower = log.period.measurement[1]._text + log.period.measurement[0]._text;
+							if (log.period.measurement[0]._text !== 0) {
+								console.log(log);
+							}
+						} else { measurePower = log.period.measurement._text; }
+						// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
+						// readings.tm = Date.parse(new Date(powerTm));
+					}
+					if (log.type._text === 'electricity_produced') {
+						if (Array.isArray(log.period.measurement)) {
+							measurePowerProduced = log.period.measurement[1]._text + log.period.measurement[0]._text;
+							if (log.period.measurement[0]._text !== 0) {
+								console.log(log);
+							}
+						} else { measurePowerProduced = log.period.measurement._text; }
+						// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
+						// readings.tm = Date.parse(new Date(powerTm));
+					}
+				});
+			} catch (err) {
+				console.log(logs);
+				throw err;
+			}
 			readings.pwr = measurePower - measurePowerProduced;
 			readings.net = powerPeak + powerOffpeak - powerPeakProduced - powerOffpeakProduced;
 			readings.p2 = powerPeak;
@@ -306,7 +316,7 @@ module.exports = SmileP1;
 			// fill in the ip address of the device, e.g. '192.168.1.50'
 			const options = { id='yourDeviceID', host='yourDeviceIP'}
 			await smile.login(options);
-			const powerInfo = await youless.getMeterReadings();
+			const powerInfo = await smile.getMeterReadings();
 			console.log(powerInfo);
 		} catch (error) {
 			console.log(error);
