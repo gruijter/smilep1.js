@@ -1,1 +1,1 @@
-2.2.0 - 28-12-2018 Fixed several LS110 issues. Docs update.
+1.0.0 - 10-06-2019 Initial NPM release compatible with Smile P1 firmware 2 and 3.
