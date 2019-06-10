@@ -63,11 +63,20 @@ class SmileP1 {
 	*/
 	async getMeterReadings() {
 		try {
+			let readings = {};
 			// first try method 1
-			let readings = await this._getMeterReadings1();
-			this.getMeterMethod = 1;
-			if (!readings.tm) {
-				// now try method 2
+			if (this.getMeterMethod !== 2) {
+				readings = await this._getMeterReadings1()
+					.catch(() => {
+						return {};
+					})
+					.then((rdgs) => {
+						this.getMeterMethod = 1;
+						return rdgs;
+					});
+			}
+			// now try method 2
+			if (!readings.tm && !readings.gtm) {
 				this.getMeterMethod = undefined;
 				readings = await this._getMeterReadings2();
 				this.getMeterMethod = 2;
@@ -99,7 +108,6 @@ class SmileP1 {
 				readings.tm = powerTm;
 			}	catch (err) {
 				// console.log('Error parsing power information, or no power readings available');
-				console.log(result);
 			}
 			try {
 				const gas = Number(regexGas.exec(result)[1]);
@@ -108,7 +116,9 @@ class SmileP1 {
 				readings.gtm = gasTm;
 			}	catch (err) {
 				// console.log('Error parsing gas information, or no gas readings available');
-				console.log(result);
+			}
+			if (!readings.tm && !readings.gtm) {
+				throw Error('Error parsing meter info');
 			}
 			return Promise.resolve(readings);
 		} catch (error) {
@@ -149,9 +159,6 @@ class SmileP1 {
 					if (log.type._text === 'gas_consumed') {
 						gas = log.period.measurement._text;	// gas
 						gasTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
-						if (!gas) {
-							console.log(log);
-						}
 					}
 				});
 				logs.point_log.forEach((log) => {

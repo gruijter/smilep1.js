@@ -1,2 +1,2 @@
-1.0.1 - 10-06-2019 Docs update. Added extra debug logs.
+1.0.2 - 10-06-2019 Docs update. Added extra debug logs.
 1.0.0 - 10-06-2019 Initial NPM release compatible with Smile P1 firmware 2 and 3.
