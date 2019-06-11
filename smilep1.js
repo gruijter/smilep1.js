@@ -139,20 +139,24 @@ class SmileP1 {
 			const result = await this._makeRequest(objectsPath);
 			// parse xml to json object
 			const parseOptions = {
-				compact: true, nativeType: true, ignoreDeclaration: true, ignoreAttributes: true, // spaces: 2,
+				compact: true, nativeType: true, ignoreDeclaration: true, // spaces: 2,
 			};
 			const json = parseXml.xml2js(result, parseOptions);
 			const logs = json.domain_objects.location.logs;
 			try {
 				logs.cumulative_log.forEach((log) => {
 					if (log.type._text === 'electricity_consumed') {
-						powerOffpeak = log.period.measurement[1]._text / 1000;	// powerOffPeak
-						powerPeak = log.period.measurement[0]._text / 1000;	// powerPeak
+						powerOffpeak = log.period.measurement.filter(m => (m._attributes.tariff_indicator === 'nl_offpeak'
+							|| m._attributes.tariff === 'nl_offpeak'))[0]._text / 1000;
+						powerPeak = log.period.measurement.filter(m => (m._attributes.tariff_indicator === 'nl_peak'
+						|| m._attributes.tariff === 'nl_peak'))[0]._text / 1000;
 						powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
 					}
 					if (log.type._text === 'electricity_produced') {
-						powerOffpeakProduced = log.period.measurement[1]._text / 1000;	// powerOffpeakProduced
-						powerPeakProduced = log.period.measurement[0]._text / 1000;	// powerPeakProduced
+						powerOffpeakProduced = log.period.measurement.filter(m => (m._attributes.tariff_indicator === 'nl_offpeak'
+						|| m._attributes.tariff === 'nl_offpeak'))[0]._text / 1000;
+						powerPeakProduced = log.period.measurement.filter(m => (m._attributes.tariff_indicator === 'nl_peak'
+						|| m._attributes.tariff === 'nl_peak'))[0]._text / 1000;
 					}
 					if (log.type._text === 'gas_consumed') {
 						gas = log.period.measurement._text;	// gas
@@ -162,7 +166,7 @@ class SmileP1 {
 				logs.point_log.forEach((log) => {
 					if (log.type._text === 'electricity_consumed') {
 						if (Array.isArray(log.period.measurement)) {
-							measurePower = log.period.measurement[1]._text + log.period.measurement[0]._text; // 0=peak, 1=offPeak
+							measurePower = log.period.measurement[1]._text + log.period.measurement[0]._text; // 0=peak, 1=offPeak, or vice versa
 						} else { measurePower = log.period.measurement._text; }
 						// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
 						// readings.tm = Date.parse(new Date(powerTm));
@@ -330,7 +334,7 @@ module.exports = SmileP1;
 * @description Set of configurable options to set on the router class
 * @property {string} id - The short ID of the Smile P1.
 * @property {string} host - The url or ip address of the Smile P1.
-* @property {number} [port = 80] - The SOAP port of the router. Defaults to 80.
+* @property {number} [port = 80] - The port of the Smile P1. Defaults to 80. TLS/SSL is used when using port 443.
 * @property {number} [timeout = 4000] - http(s) timeout in milliseconds. Defaults to 4000ms.
 * @example // smile options
 { id: 'hcfrasde',

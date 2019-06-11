@@ -57,18 +57,21 @@ async function doTest() {
 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
 		// get meter readings V2 or V3 firmware
-		log.push('trying to get meter readings');
-		const readings = await smile.getMeterReadings()
-			.catch(error => logError(error));
+		log.push('trying to get meter readings1');
+		const readings = await smile._getMeterReadings1()
+			.catch((error) => {
+				log.push(error.message);
+				errorCount += 1;
+			});
 		log.push(readings);
 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
-		// // get meter readings V3 firmware
-		// log.push('trying to get meter readings2');
-		// const readings2 = await smile._getMeterReadings2()
-		// 	.catch(error => logError(error));
-		// log.push(readings2);
-		// log.push(`t = ${(Date.now() - t0) / 1000}`);
+		// get meter readings V3 firmware
+		log.push('trying to get meter readings2');
+		const readings2 = await smile._getMeterReadings2()
+			.catch(error => logError(error));
+		log.push(readings2);
+		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
 		// finish test
 		smile.lastResponse = '';
