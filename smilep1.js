@@ -67,16 +67,14 @@ class SmileP1 {
 			// first try method 1
 			if (this.getMeterMethod !== 2) {
 				readings = await this._getMeterReadings1()
-					.catch(() => {
-						return {};
-					})
+					.catch(() => undefined)
 					.then((rdgs) => {
 						this.getMeterMethod = 1;
 						return rdgs;
 					});
 			}
 			// now try method 2
-			if (!readings.tm && !readings.gtm) {
+			if (!readings || (!readings.tm && !readings.gtm)) {
 				this.getMeterMethod = undefined;
 				readings = await this._getMeterReadings2();
 				this.getMeterMethod = 2;
