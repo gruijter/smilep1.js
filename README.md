@@ -3,7 +3,7 @@
 ### It allows you to:
 
 #### get:
-* device information, including firmware version
+* device information, including firmware version (Not implemented yet :) )
 * live energy and gas readings of P1 smart meters
 
 #### set:

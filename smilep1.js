@@ -148,13 +148,13 @@ class SmileP1 {
 			try {
 				logs.cumulative_log.forEach((log) => {
 					if (log.type._text === 'electricity_consumed') {
-						powerOffpeak = log.period.measurement[0]._text / 1000;	// powerOffPeak
-						powerPeak = log.period.measurement[1]._text / 1000;	// powerPeak
+						powerOffpeak = log.period.measurement[1]._text / 1000;	// powerOffPeak
+						powerPeak = log.period.measurement[0]._text / 1000;	// powerPeak
 						powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
 					}
 					if (log.type._text === 'electricity_produced') {
-						powerOffpeakProduced = log.period.measurement[0]._text / 1000;	// powerOffpeakProduced
-						powerPeakProduced = log.period.measurement[1]._text / 1000;	// powerPeakProduced
+						powerOffpeakProduced = log.period.measurement[1]._text / 1000;	// powerOffpeakProduced
+						powerPeakProduced = log.period.measurement[0]._text / 1000;	// powerPeakProduced
 					}
 					if (log.type._text === 'gas_consumed') {
 						gas = log.period.measurement._text;	// gas
@@ -164,10 +164,7 @@ class SmileP1 {
 				logs.point_log.forEach((log) => {
 					if (log.type._text === 'electricity_consumed') {
 						if (Array.isArray(log.period.measurement)) {
-							measurePower = log.period.measurement[1]._text + log.period.measurement[0]._text;
-							if (log.period.measurement[0]._text !== 0) {
-								console.log(log);
-							}
+							measurePower = log.period.measurement[1]._text + log.period.measurement[0]._text; // 0=peak, 1=offPeak
 						} else { measurePower = log.period.measurement._text; }
 						// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
 						// readings.tm = Date.parse(new Date(powerTm));
@@ -175,9 +172,6 @@ class SmileP1 {
 					if (log.type._text === 'electricity_produced') {
 						if (Array.isArray(log.period.measurement)) {
 							measurePowerProduced = log.period.measurement[1]._text + log.period.measurement[0]._text;
-							if (log.period.measurement[0]._text !== 0) {
-								console.log(log);
-							}
 						} else { measurePowerProduced = log.period.measurement._text; }
 						// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
 						// readings.tm = Date.parse(new Date(powerTm));
@@ -354,7 +348,7 @@ module.exports = SmileP1;
 * @property {number} net power consumption in Watt. e.g. 3030
 * @property {number} p2 P2 consumption counter (high tariff). e.g. 896.812
 * @property {number} p1 P1 consumption counter (low tariff). e.g. 16110.964
-* @property {number} n2 N2 consumption counter (high tariff). e.g. 4250.32
+* @property {number} n2 N2 production counter (high tariff). e.g. 4250.32
 * @property {number} n1 N1 production counter (low tariff). e.g. 1570.936
 * @property {number} tm time of retrieving info. unix-time-format. e.g. 1542575626
 * @property {number} gas counter gas-meter (in m^3). e.g. 6161.243
