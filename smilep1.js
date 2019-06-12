@@ -13,7 +13,8 @@ const https = require('https');
 // const util = require('util');
 
 const modulesPath = '/core/modules';
-const objectsPath = '/core/domain_objects';
+const objectsPath ='/core/direct_objects';
+// const domainObjectsPath = '/core/domain_objects';
 // const firmwarePath = '/update/firmware';
 // const wifiPath = '/configuration/wifi';
 const defaultPort = 80;
@@ -142,7 +143,7 @@ class SmileP1 {
 				compact: true, nativeType: true, ignoreDeclaration: true, // spaces: 2,
 			};
 			const json = parseXml.xml2js(result, parseOptions);
-			const logs = json.domain_objects.location.logs;
+			const logs = json.direct_objects.location.logs;
 			try {
 				logs.cumulative_log.forEach((log) => {
 					if (log.type._text === 'electricity_consumed') {
