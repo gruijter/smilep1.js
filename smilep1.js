@@ -13,7 +13,7 @@ const https = require('https');
 // const util = require('util');
 
 const modulesPath = '/core/modules';
-const objectsPath ='/core/direct_objects';
+const objectsPath = '/core/direct_objects';
 // const domainObjectsPath = '/core/domain_objects';
 // const firmwarePath = '/update/firmware';
 // const wifiPath = '/configuration/wifi';
@@ -181,7 +181,7 @@ class SmileP1 {
 					}
 				});
 			} catch (err) {
-				console.log(logs);
+				console.log(JSON.stringify(logs));
 				throw err;
 			}
 			readings.pwr = measurePower - measurePowerProduced;
