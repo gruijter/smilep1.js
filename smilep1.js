@@ -12,11 +12,24 @@ const http = require('http');
 const https = require('https');
 // const util = require('util');
 
+// v2 and v3 firmware
 const modulesPath = '/core/modules';
 const objectsPath = '/core/direct_objects';
-// const domainObjectsPath = '/core/domain_objects';
-// const firmwarePath = '/update/firmware';
+const domainObjectsPath = '/core/domain_objects';
+// const enumerationPath = '/core/enumerations';
+
+// v2 firmware only:
+const statusPath = '/system/status/xml';
+// const licensePath = '/license';
+// const timePath = '/configuration/time';
+// const updateFirmwarePath = '/update/firmware';
 // const wifiPath = '/configuration/wifi';
+// const networkPath = '/configuration/network'
+
+// v3 firmware only:
+const gatewayPath = '/core/domain_objects;class=Gateway'; // class=Module Appliance Location
+const servicesPath = '/core/modules;class=Services';
+
 const defaultPort = 80;
 const defaultTimeout = 4000;
 
@@ -29,18 +42,20 @@ const regexPowerOffpeakProduced = new RegExp(/unit='Wh' directionality='produced
 const regexGas = new RegExp(/unit='m3' directionality='consumed'>(.*?)<\/measurement>/);
 const regexPowerTm = new RegExp(/<measurement log_date='(.*?)' unit='Wh' directionality='consumed' tariff_indicator='nl_offpeak'>/);
 const regexGasTm = new RegExp(/<measurement log_date='(.*?)' unit='m3' directionality='consumed'>/);
-// const regexFwLevel = new RegExp(/<version>(.*?)<\/version>/);
+const regexFwLevel2 = new RegExp(/<version>(.*?)<\/version>/);
+const regexFwLevel3 = new RegExp(/<firmware_version>(.*?)<\/firmware_version>/);
 
 class SmileP1 {
 	// Represents a session to a Plugwise Smile P1 device.
-	constructor(opts) {	// id, host, port, timeout
+	constructor(opts) {	// id, host, port, timeout, meterMethod
 		const options = opts || {};
 		this.id = options.id;
 		this.host = options.host;
 		this.port = options.port || defaultPort;
 		this.timeout = options.timeout || defaultTimeout;
 		this.loggedIn = true;
-		this.getMeterMethod = undefined;
+		this.firmwareLevel = undefined;
+		this.meterMethod = options.meterMethod;	// force 1 for fw2, or 2 for fw 3. Will be automaically determined if undefined
 		this.lastResponse = undefined;
 	}
 
@@ -49,13 +64,87 @@ class SmileP1 {
 	* @param {sessionOptions} [options] - configurable session options
 	* @returns {Promise.<loggedIn>} The loggedIn state.
 	*/
-	login(opts) {
-		const options = opts || {};
-		this.id = options.id || this.id;
-		this.host = options.host || this.host;
-		this.port = options.port || this.port;
-		this.timeout = options.timeout || this.timeout;
-		return Promise.resolve(this.loggedIn);
+	async login(opts) {
+		try {
+			const options = opts || {};
+			this.id = options.id || this.id;
+			this.host = options.host || this.host;
+			this.port = options.port || this.port;
+			this.timeout = options.timeout || this.timeout;
+			await this.getFirmwareLevel();
+			this.loggedIn = true;
+			return Promise.resolve(this.loggedIn);
+		} catch (error) {
+			this.loggedIn = false;
+			return Promise.reject(error);
+		}
+	}
+
+	/**
+	* Get firmware level of the Smile P1 device.
+	* @returns {Promise.<firmwareLevel>} The status information.
+	*/
+	async getFirmwareLevel() {
+		try {
+			// try for fw 3
+			const result = await this._makeRequest(gatewayPath, true);
+			const fw = regexFwLevel3.exec(result);
+			if (Array.isArray(fw)) {
+				this.firmwareLevel = fw[1];
+			} else {	// try for fw 2
+				const result2 = await this._makeRequest(statusPath, true);
+				const fw2 = regexFwLevel2.exec(result2);
+				if (Array.isArray(fw2)) {
+					this.firmwareLevel = fw2[1];
+				}
+			}
+			return Promise.resolve(this.firmwareLevel);
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	}
+
+	/**
+	* Get the meterMethod. Returns 1 for firmware below 3, returns 2 otherwise
+	* @returns {Promise.<meterMethod>} The meter Method.
+	*/
+	async getMeterMethod() {
+		try {
+			this.getFirmwareLevel();
+			if (typeof this.firmwareLevel === 'string') {
+				if (this.firmwareLevel[0] <= 2) {
+					this.meterMethod = 1;
+				} else { this.meterMethod = 2; }
+			}
+			return Promise.resolve(this.meterMethod);
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	}
+
+	/**
+	* Get status information of the Smile P1 device. (V2 firmware only)
+	* @returns {Promise.<status>} The status information.
+	*/
+	async getStatus() {
+		try {
+			const result = await this._makeRequest(statusPath);
+			// parse xml to json object
+			const parseOptions = {
+				compact: true, nativeType: true, ignoreDeclaration: true, // spaces: 2,
+			};
+			const { status } = parseXml.xml2js(result, parseOptions);
+			const state = {};
+			Object.keys(status).forEach((key) => {
+				state[key] = {};
+				Object.keys(status[key]).forEach((sub) => {
+					state[key][sub] = status[key][sub]._text;
+				});
+			});
+			return Promise.resolve(state);
+		} catch (error) {
+			return Promise.reject(error);
+		}
 	}
 
 	/**
@@ -64,21 +153,16 @@ class SmileP1 {
 	*/
 	async getMeterReadings() {
 		try {
-			let readings = {};
-			// first try method 1
-			if (this.getMeterMethod !== 2) {
-				readings = await this._getMeterReadings1()
-					.catch(() => undefined)
-					.then((rdgs) => {
-						this.getMeterMethod = 1;
-						return rdgs;
-					});
+			if (!this.meterMethod) {
+				await this.getMeterMethod();
 			}
-			// now try method 2
-			if (!readings || (!readings.tm && !readings.gtm)) {
-				this.getMeterMethod = undefined;
+			let readings = {};
+			// method 1 for fw 2
+			if (this.meterMethod === 1) {
+				readings = await this._getMeterReadings1()
+					.catch(() => undefined);
+			} else {	// method 2 as default
 				readings = await this._getMeterReadings2();
-				this.getMeterMethod = 2;
 			}
 			return Promise.resolve(readings);
 		} catch (error) {
@@ -144,6 +228,7 @@ class SmileP1 {
 			};
 			const json = parseXml.xml2js(result, parseOptions);
 			const logs = json.direct_objects.location.logs;
+			// console.log(logs);
 			try {
 				logs.cumulative_log.forEach((log) => {
 					if (log.type._text === 'electricity_consumed') {
@@ -199,9 +284,9 @@ class SmileP1 {
 		}
 	}
 
-	async _makeRequest(actionPath) {
+	async _makeRequest(actionPath, force) {
 		try {
-			if (!this.loggedIn) {
+			if (!this.loggedIn && !force) {
 				return Promise.reject(Error('Not logged in'));
 			}
 			const postMessage = '';
@@ -239,8 +324,8 @@ class SmileP1 {
 				throw Error(`HTTP request Failed. Status Code: ${result.statusCode}`);
 			}
 			const contentType = result.headers['content-type'];
-			if (!/^text\/xml/.test(contentType)) {
-				throw Error(`Invalid content-type. Expected text/xml but received ${contentType}`);
+			if (!/^text\//.test(contentType)) {
+				throw Error(`Invalid content-type. Expected text/xml or text/html but received ${contentType}`);
 			}
 			return Promise.resolve(result.body);
 		} catch (error) {
@@ -307,7 +392,7 @@ module.exports = SmileP1;
 * @classdesc Class representing a session with a Smile P1 device.
 * @param {sessionOptions} [options] - configurable session options
 * @property {boolean} loggedIn - login state.
-* @property {number} getMeterMethod - 1: 'modules', 2: 'domain_objects'.
+* @property {number} firmwareLevel - firmware level of the Smile P1. e.g. '2.1.13'
 
 * @example // create a Smile P1 session, login to device, fetch meter readings
 	const Smile = require('smilep1');
@@ -335,9 +420,10 @@ module.exports = SmileP1;
 * @description Set of configurable options to set on the router class
 * @property {string} id - The short ID of the Smile P1.
 * @property {string} host - The url or ip address of the Smile P1.
-* @property {number} [port = 80] - The port of the Smile P1. Defaults to 80. TLS/SSL is used when using port 443.
+* @property {number} [port = 80] - The port of the Smile P1. Defaults to 80. TLS/SSL will be used when setting port to 443.
 * @property {number} [timeout = 4000] - http(s) timeout in milliseconds. Defaults to 4000ms.
-* @example // smile options
+* @property {number} [meterMethod] - 1 for fw2, 2 for fw 3. Will be automaically determined if undefined.
+* @example // session options
 { id: 'hcfrasde',
   host:'192.168.1.50',
   port: 443,
@@ -368,8 +454,33 @@ module.exports = SmileP1;
 	gtm: 1560178800000 }
 */
 
-/*
+/**
+* @typedef status
+* @description status is an object containing Smile P1 device information. Note: Only works for V2 firmware!
+* @property {object} status Object containing system information
+* @example // status
+{ system:
+   { product: 'smile',
+     mode: 'p1',
+     version: '2.1.13',
+     kernel: 'Linux 3.8.11, May 19 14:10:38 CEST 2016',
+     date: '2019-06-14T10:34:21+0200',
+     uptime: ' 7:23,  load average: 0.14, 0.19, 0.22' },
+  application:
+   { p1_logger: 'running',
+     last_telegram: ' CEST',
+     last_parse_time: 'Tue Jun 11 23:06:38 2019 CEST' },
+  network:
+   { hostname: 'smile7ac5b6',
+     type: 'WiFi (wireless)',
+     ip_address: '192.168.1.2',
+     mac_address: '78:25:42:7A:B5:B1',
+     ssid: 'MyWifi',
+     mode: 'sta',
+     link_quality: -35 } }
+*/
 
+/*
 meter xml:
 <modules>
 <module id="c678caf322124cc2bd4b84c0e514b103">

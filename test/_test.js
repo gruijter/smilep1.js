@@ -40,37 +40,31 @@ async function setupSession(opts) {
 	}
 }
 
-function logError(error) {
-	log.push(error);
-	const lastResponse = { lastResponse: smile.lastResponse };
-	log.push(lastResponse);
-	errorCount += 1;
-	return {};
-}
+// function logError(error) {
+// 	log.push(error);
+// 	const lastResponse = { lastResponse: smile.lastResponse };
+// 	log.push(lastResponse);
+// 	errorCount += 1;
+// 	return {};
+// }
 
 async function doTest() {
 	try {
 
 		// for other methods you first need to be logged in.
 		log.push('trying to login...');
-		await smile.login();
+		const status = await smile.login();
+		log.push(status);
 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
-		// get meter readings V2 or V3 firmware
-		log.push('trying to get meter readings1');
-		const readings = await smile._getMeterReadings1()
+		// get meter readings
+		log.push('trying to get meter readings');
+		const readings = await smile.getMeterReadings()
 			.catch((error) => {
 				log.push(error.message);
 				errorCount += 1;
 			});
 		log.push(readings);
-		log.push(`t = ${(Date.now() - t0) / 1000}`);
-
-		// get meter readings V3 firmware
-		log.push('trying to get meter readings2');
-		const readings2 = await smile._getMeterReadings2()
-			.catch(error => logError(error));
-		log.push(readings2);
 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
 		// finish test

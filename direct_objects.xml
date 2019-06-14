@@ -1,0 +1,412 @@
+<direct_objects>
+    <appliance id="f46abfcb1de64189863e9ddf4bd5e5de">
+        <name>Meterkast</name>
+        <description/>
+        <type>pwcentral</type>
+        <created_date>2019-05-11T11:46:41.865+02:00</created_date>
+        <modified_date>2019-05-11T11:46:59.283+02:00</modified_date>
+        <deleted_date/>
+        <actuators/>
+        <services>
+            <gas_interval_meter id="894ddb99a5214064a42de614aa0aa8fa"/>
+            <electricity_interval_meter id="870c97cf00d64c7f9225f36762bd7927"/>
+            <electricity_cumulative_meter id="fa20d4aa86c74baba2ca3dfca18c5d98"/>
+            <electricity_point_meter id="7d2c282a0aed400093a2e46d056761c5"/>
+            <gas_cumulative_meter id="89cbc8e8311447ad9f28fc74f910ca00"/>
+        </services>
+        <logs>
+            <interval_log id="ea2612f6bcfe4c028945ecdc2f823e68">
+                <unit>Wh</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date>2019-06-12T20:00:00+02:00</last_consecutive_log_date>
+                <updated_date>2019-06-12T21:00:00+02:00</updated_date>
+                <interval>PT5M</interval>
+                <period start_date="2019-05-11T11:00:00+02:00" end_date="2019-06-12T21:00:00+02:00" interval="PT1H">
+                    <measurement log_date="2019-06-12T21:00:00+02:00" tariff_indicator="nl_offpeak">0.000</measurement>
+                    <measurement log_date="2019-06-12T21:00:00+02:00" tariff_indicator="nl_peak">89.000</measurement>
+                </period>
+            </interval_log>
+            <cumulative_log id="e153bca73ea2417d91cf307c10199a1d">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date>2019-06-12T21:24:58+02:00</last_consecutive_log_date>
+                <updated_date>2019-06-12T21:24:58+02:00</updated_date>
+                <period start_date="2019-05-11T11:45:03+02:00" end_date="2019-06-12T21:24:58+02:00">
+                    <measurement log_date="2019-06-12T21:24:58+02:00">16.447</measurement>
+                </period>
+            </cumulative_log>
+            <interval_log id="a55eadad5ea8456480c6ed4572af6bc3">
+                <unit>Wh</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date>2019-06-12T20:00:00+02:00</last_consecutive_log_date>
+                <updated_date>2019-06-12T21:00:00+02:00</updated_date>
+                <interval>PT5M</interval>
+                <period start_date="2019-05-11T11:00:00+02:00" end_date="2019-06-12T21:00:00+02:00" interval="PT1H">
+                    <measurement log_date="2019-06-12T21:00:00+02:00" tariff_indicator="nl_offpeak">0.000</measurement>
+                    <measurement log_date="2019-06-12T21:00:00+02:00" tariff_indicator="nl_peak">0.000</measurement>
+                </period>
+            </interval_log>
+            <point_log id="f5afaf1d70164782b3669a262d060b12">
+                <unit>W</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date>2019-06-12T21:29:37+02:00</last_consecutive_log_date>
+                <updated_date>2019-06-12T21:29:37+02:00</updated_date>
+                <period start_date="2019-05-11T11:46:53+02:00" end_date="2019-06-12T21:29:37+02:00">
+                    <measurement log_date="2019-06-12T21:29:37+02:00">0.000</measurement>
+                </period>
+            </point_log>
+            <cumulative_log id="ff81e35a709f40da9300e54e14d2a588">
+                <unit>Wh</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date>2019-06-12T21:25:00+02:00</last_consecutive_log_date>
+                <updated_date>2019-06-12T21:25:00+02:00</updated_date>
+                <period start_date="2019-05-11T11:45:00+02:00" end_date="2019-06-12T21:25:00+02:00">
+                    <measurement log_date="2019-06-12T21:25:00+02:00" tariff_indicator="nl_offpeak">0.000</measurement>
+                    <measurement log_date="2019-06-12T21:25:00+02:00" tariff_indicator="nl_peak">0.000</measurement>
+                </period>
+            </cumulative_log>
+            <interval_log id="a28ea346d57a44368aaacbac9021b930">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date>2019-06-12T20:00:00+02:00</last_consecutive_log_date>
+                <updated_date>2019-06-12T21:00:00+02:00</updated_date>
+                <interval>PT1H</interval>
+                <period start_date="2019-05-11T11:00:00+02:00" end_date="2019-06-12T21:00:00+02:00" interval="PT1H">
+                    <measurement log_date="2019-06-12T21:00:00+02:00">0.005</measurement>
+                </period>
+            </interval_log>
+            <point_log id="838ac71015154d148f4e7263f2a5c531">
+                <unit>W</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date>2019-06-12T21:29:37+02:00</last_consecutive_log_date>
+                <updated_date>2019-06-12T21:29:37+02:00</updated_date>
+                <period start_date="2019-05-11T11:46:53+02:00" end_date="2019-06-12T21:29:37+02:00">
+                    <measurement log_date="2019-06-12T21:29:37+02:00">148.000</measurement>
+                </period>
+            </point_log>
+            <cumulative_log id="22c40ab304f34a998c1b34c7ed6577c5">
+                <unit>Wh</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date>2019-06-12T21:25:00+02:00</last_consecutive_log_date>
+                <updated_date>2019-06-12T21:25:00+02:00</updated_date>
+                <period start_date="2019-05-11T11:45:00+02:00" end_date="2019-06-12T21:25:00+02:00">
+                    <measurement log_date="2019-06-12T21:25:00+02:00" tariff_indicator="nl_offpeak">124419.000</measurement>
+                    <measurement log_date="2019-06-12T21:25:00+02:00" tariff_indicator="nl_peak">74223.000</measurement>
+                </period>
+            </cumulative_log>
+        </logs>
+    </appliance>
+    <appliance id="fb40879cfd964b69a23460758dc4a78f">
+        <name>kWh Meter</name>
+        <description/>
+        <type>zz_misc</type>
+        <created_date>2019-05-11T11:45:47.976+02:00</created_date>
+        <modified_date>2019-05-11T11:45:50+02:00</modified_date>
+        <deleted_date/>
+        <actuators/>
+        <services></services>
+        <logs>
+            <cumulative_log id="6f9e3e1366304a5485be68d0065826f8">
+                <unit>Wh</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </cumulative_log>
+            <point_log id="80259f5f1b954142ba775184bd790f9c">
+                <unit>W</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date>2019-05-11T11:45:54+02:00</last_consecutive_log_date>
+                <updated_date>2019-05-11T11:45:54+02:00</updated_date>
+                <period start_date="2019-05-11T11:45:49+02:00" end_date="2019-05-11T11:45:54+02:00">
+                    <measurement log_date="2019-05-11T11:45:54+02:00">481.000</measurement>
+                </period>
+            </point_log>
+            <cumulative_log id="343b481bcd4a49ddb47d50999ff9c474">
+                <unit>Wh</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </cumulative_log>
+            <interval_log id="3448937826ca4fffa242991fe93279c1">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+                <interval>PT1H</interval>
+            </interval_log>
+            <interval_log id="a1f4182d4f10498cb9b067db266486fa">
+                <unit>Wh</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+                <interval>PT5M</interval>
+            </interval_log>
+            <point_log id="61e4f79e291241e881153a5c1abe6883">
+                <unit>W</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date>2019-05-11T11:45:54+02:00</last_consecutive_log_date>
+                <updated_date>2019-05-11T11:45:54+02:00</updated_date>
+                <period start_date="2019-05-11T11:45:49+02:00" end_date="2019-05-11T11:45:54+02:00">
+                    <measurement log_date="2019-05-11T11:45:54+02:00">0.000</measurement>
+                </period>
+            </point_log>
+            <interval_log id="4c6c77ae8e234aa3a162de089a3ec555">
+                <unit>Wh</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+                <interval>PT5M</interval>
+            </interval_log>
+            <cumulative_log id="e93100308c4b4aeeb97d58b57290a8c2">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </cumulative_log>
+        </logs>
+    </appliance>
+    <location id="59d9538f944a446b9e6b0f832e3bdacd">
+        <name>Meterkast</name>
+        <description/>
+        <type>building</type>
+        <created_date>2019-05-10T13:49:50.576+02:00</created_date>
+        <modified_date>2019-05-10T14:00:23+02:00</modified_date>
+        <deleted_date/>
+        <actuators/>
+        <locations/>
+        <appliances/>
+        <services></services>
+        <logs>
+            <interval_log id="41997c291e3144c09eba48c781ad13de">
+                <unit>Wh</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date>2019-05-11T10:00:00+02:00</last_consecutive_log_date>
+                <updated_date>2019-05-11T11:00:00+02:00</updated_date>
+                <interval>PT5M</interval>
+                <period start_date="2019-05-10T14:00:00+02:00" end_date="2019-05-11T11:00:00+02:00" interval="PT1H">
+                    <measurement log_date="2019-05-11T11:00:00+02:00" tariff_indicator="nl_offpeak">0.000</measurement>
+                    <measurement log_date="2019-05-11T11:00:00+02:00" tariff_indicator="nl_peak">0.000</measurement>
+                </period>
+            </interval_log>
+            <cumulative_log id="72af9663921c4a4d9f7de31430f92965">
+                <unit>Wh</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date>2019-05-11T11:05:00+02:00</last_consecutive_log_date>
+                <updated_date>2019-05-11T11:05:00+02:00</updated_date>
+                <period start_date="2019-05-10T13:50:00+02:00" end_date="2019-05-11T11:05:00+02:00">
+                    <measurement log_date="2019-05-11T11:05:00+02:00" tariff_indicator="nl_offpeak">0.000</measurement>
+                    <measurement log_date="2019-05-11T11:05:00+02:00" tariff_indicator="nl_peak">0.000</measurement>
+                </period>
+            </cumulative_log>
+            <interval_log id="da9f1184dd3546369814396cd8e4607b">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date>2019-05-11T10:00:00+02:00</last_consecutive_log_date>
+                <updated_date>2019-05-11T11:00:00+02:00</updated_date>
+                <interval>PT1H</interval>
+                <period start_date="2019-05-10T15:00:00+02:00" end_date="2019-05-11T11:00:00+02:00" interval="PT1H">
+                    <measurement log_date="2019-05-11T11:00:00+02:00">0.000</measurement>
+                </period>
+            </interval_log>
+            <cumulative_log id="57f4d516d4074687a2260ccb7dc2ea43">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date>2019-05-11T11:05:03+02:00</last_consecutive_log_date>
+                <updated_date>2019-05-11T11:05:03+02:00</updated_date>
+                <period start_date="2019-05-10T14:00:06+02:00" end_date="2019-05-11T11:05:03+02:00">
+                    <measurement log_date="2019-05-11T11:05:03+02:00">0.764</measurement>
+                </period>
+            </cumulative_log>
+            <point_log id="df7b8e86a371497cb671dba15898175b">
+                <unit>W</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date>2019-05-11T11:45:22+02:00</last_consecutive_log_date>
+                <updated_date>2019-05-11T11:45:22+02:00</updated_date>
+                <period start_date="2019-05-10T13:49:48+02:00" end_date="2019-05-11T11:45:22+02:00">
+                    <measurement log_date="2019-05-11T11:45:22+02:00">0.000</measurement>
+                </period>
+            </point_log>
+            <interval_log id="d6fab7fd1405493492c6a24e83cabe73">
+                <unit>Wh</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date>2019-05-11T10:00:00+02:00</last_consecutive_log_date>
+                <updated_date>2019-05-11T11:00:00+02:00</updated_date>
+                <interval>PT5M</interval>
+                <period start_date="2019-05-10T14:00:00+02:00" end_date="2019-05-11T11:00:00+02:00" interval="PT1H">
+                    <measurement log_date="2019-05-11T11:00:00+02:00" tariff_indicator="nl_offpeak">17.000</measurement>
+                    <measurement log_date="2019-05-11T11:00:00+02:00" tariff_indicator="nl_peak">0.000</measurement>
+                </period>
+            </interval_log>
+            <point_log id="ba2947640e6f43cb9a5c95e79c242425">
+                <unit>W</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date>2019-05-11T11:45:22+02:00</last_consecutive_log_date>
+                <updated_date>2019-05-11T11:45:22+02:00</updated_date>
+                <period start_date="2019-05-10T13:49:48+02:00" end_date="2019-05-11T11:45:22+02:00">
+                    <measurement log_date="2019-05-11T11:45:22+02:00">388.000</measurement>
+                </period>
+            </point_log>
+            <cumulative_log id="8b26d11eb43b4de6b83802117b0df0fa">
+                <unit>Wh</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date>2019-05-11T11:05:00+02:00</last_consecutive_log_date>
+                <updated_date>2019-05-11T11:05:00+02:00</updated_date>
+                <period start_date="2019-05-10T13:50:00+02:00" end_date="2019-05-11T11:05:00+02:00">
+                    <measurement log_date="2019-05-11T11:05:00+02:00" tariff_indicator="nl_offpeak">4149.000</measurement>
+                    <measurement log_date="2019-05-11T11:05:00+02:00" tariff_indicator="nl_peak">0.000</measurement>
+                </period>
+            </cumulative_log>
+        </logs>
+    </location>
+    <appliance id="c3dd385bc4e94c1dbd623822cdefa76c">
+        <name>kWh Meter</name>
+        <description/>
+        <type>pwcentral</type>
+        <created_date>2019-05-11T11:46:11.634+02:00</created_date>
+        <modified_date>2019-05-11T11:46:13+02:00</modified_date>
+        <deleted_date/>
+        <actuators/>
+        <services></services>
+        <logs>
+            <interval_log id="df16a14371f44ef2bc18d2a3b71d1d02">
+                <unit>Wh</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+                <interval>PT5M</interval>
+            </interval_log>
+            <point_log id="62f6ed5ebad343b18a6d8b2cb26830f7">
+                <unit>W</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </point_log>
+            <cumulative_log id="2c9e01c299194cc8b45ed70ab080b946">
+                <unit>Wh</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </cumulative_log>
+            <point_log id="97d9cfaf80e54c64945af17661b434e6">
+                <unit>W</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </point_log>
+            <cumulative_log id="07dbb9f7cdfb4bd996ce57c82ae2b9bb">
+                <unit>Wh</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </cumulative_log>
+            <interval_log id="52446322137d489d8441ea9749ec5bef">
+                <unit>Wh</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+                <interval>PT5M</interval>
+            </interval_log>
+            <interval_log id="ede0fc7bd41d4e5ca32766ef4dc8b5fc">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+                <interval>PT1H</interval>
+            </interval_log>
+            <cumulative_log id="40fb41c73e444ff0a1535a8f46d09807">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </cumulative_log>
+        </logs>
+    </appliance>
+    <appliance id="5eeffeae20ac40e59faa28b99d16b49e">
+        <name>Gas Meter</name>
+        <description/>
+        <type>pwcentral</type>
+        <created_date>2019-05-11T11:46:26.450+02:00</created_date>
+        <modified_date>2019-05-11T11:46:28+02:00</modified_date>
+        <deleted_date/>
+        <actuators/>
+        <services></services>
+        <logs>
+            <cumulative_log id="73433d8257824ae2b00bb1d18077eb11">
+                <unit>Wh</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </cumulative_log>
+            <point_log id="0ed478ac15014b1a84ae87a286a78066">
+                <unit>W</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </point_log>
+            <point_log id="11d278b27f91412fba4da32b4380ea18">
+                <unit>W</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </point_log>
+            <cumulative_log id="b7a09aa314ce49ce9fe72f7ad253c2d8">
+                <unit>Wh</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </cumulative_log>
+            <interval_log id="8d77ba9734ef4a50a9854da7838fceb6">
+                <unit>Wh</unit>
+                <type>electricity_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+                <interval>PT5M</interval>
+            </interval_log>
+            <interval_log id="bd8dd670b92d4cdea5040e675d138b65">
+                <unit>Wh</unit>
+                <type>electricity_produced</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+                <interval>PT5M</interval>
+            </interval_log>
+            <interval_log id="e9ae3e85dc7e421fadb92240f1816306">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+                <interval>PT1H</interval>
+            </interval_log>
+            <cumulative_log id="4af2f0aeb70944f5bf3fcab06f11e2c9">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </cumulative_log>
+        </logs>
+    </appliance>
+    <appliance id="d51822c9e2a5470ab38356075e776202">
+        <name>Gas Meter</name>
+        <description/>
+        <type>zz_misc</type>
+        <created_date>2019-05-11T11:45:23.147+02:00</created_date>
+        <modified_date>2019-05-11T11:45:24+02:00</modified_date>
+        <deleted_date/>
+        <actuators/>
+        <services></services>
+        <logs>
+            <interval_log id="35c8fd19b6f24471a96754a5d5c0f739">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+                <interval>PT1H</interval>
+            </interval_log>
+            <cumulative_log id="6c157bf12b804a9886a3aea447512db5">
+                <unit>m3</unit>
+                <type>gas_consumed</type>
+                <last_consecutive_log_date/>
+                <updated_date/>
+            </cumulative_log>
+        </logs>
+    </appliance>
+</direct_objects>
