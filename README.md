@@ -3,18 +3,18 @@
 ### It allows you to:
 
 #### get:
-* firmware version
+* device information
 * live energy and gas readings of P1 smart meters
 
 #### set:
 * nothing (yet)
 
 #### do:
-* discover the device in a local network (Not implemented yet :) )
+* discover the device in a local network (internet connection to plugwise required)
 * login with device ID
 
 ### Note:
-This package has been developed and tested with firmware version 2 and 3.
+This package has been developed and tested with firmware V2 and V3.
 
 ### Install:
 If you don't have Node installed yet, get it from: [Nodejs.org](https://nodejs.org "Nodejs website").
@@ -25,9 +25,9 @@ To install the Smile P1 package:
 ```
 
 ### Test:
-From the folder in which you installed the SmileP1 package, just run below command. The port only needs to be set if you are not using the default port 80.
+From the folder in which you installed the SmileP1 package, just run below command. The port only needs to be set if you are not using the default port 80. TLS/SSL will be used when setting port to 443. When no host is entered, autodiscovery will be attempted.
 ```
-> npm test id=yourDeviceID host=yourDeviceIP port=yourHostPort
+> npm test id=yourDeviceID [host=yourDeviceIP] [port=yourHostPort]
 ```
 
 ### Quickstart:

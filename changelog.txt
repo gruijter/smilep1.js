@@ -1,3 +1,4 @@
+1.1.0 - 21-07-2019 Autodiscovery via connect.plugwise.net added. DeviceInfo added. Bugfixes.
 1.0.7 - 14-06-2019 Added firmware level retrieval. Meter Method will be chosen based on fw lvl.
 1.0.6 - 12-06-2019 Changed to direct_objects path for getMeterReadings2.
 1.0.5 - 11-06-2019 Docs update. High-Low tariff reversed fix. Removed some debug logs.

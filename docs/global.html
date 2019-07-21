@@ -26,7 +26,7 @@
 
 <nav>
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SmileP1.html">SmileP1</a><ul class='methods'><li data-type='method'><a href="SmileP1.html#getFirmwareLevel">getFirmwareLevel</a></li><li data-type='method'><a href="SmileP1.html#getMeterMethod">getMeterMethod</a></li><li data-type='method'><a href="SmileP1.html#getMeterReadings">getMeterReadings</a></li><li data-type='method'><a href="SmileP1.html#getStatus">getStatus</a></li><li data-type='method'><a href="SmileP1.html#login">login</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SmileP1.html">SmileP1</a><ul class='methods'><li data-type='method'><a href="SmileP1.html#discover">discover</a></li><li data-type='method'><a href="SmileP1.html#getFirmwareLevel">getFirmwareLevel</a></li><li data-type='method'><a href="SmileP1.html#getMeterReadings">getMeterReadings</a></li><li data-type='method'><a href="SmileP1.html#getStatus">getStatus</a></li><li data-type='method'><a href="SmileP1.html#login">login</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <div id="main">
@@ -119,6 +119,245 @@
         <h3 class="subsection-title">Type Definitions</h3>
 
         
+                
+<h4 class="name" id="discoverInfo">discoverInfo</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>discoverInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object containing system information</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description">
+    <p>discoverInfo is an object containing Smile P1 device information.</p>
+</div>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// status
+{ product: 'smile',
+  version: '3.3.6',
+  lan_ip: '',
+  wifi_ip: '192.168.1.2',
+  timestamp: '2019-07-20T14:58:38+02:00',
+  zoneinfo: '',
+  rest_root: '/',
+  server_timestamp: '2019-07-20T12:58:38+00:00' }</code></pre>
+
+
+
+            
+                
+<h4 class="name" id="discoverOptions">discoverOptions</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The short ID of the Smile P1.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description">
+    <p>Set of configurable options to use during discovery</p>
+</div>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// discovery options
+{ id: 'hcfrasde' }</code></pre>
+
+
+
+            
                 
 <h4 class="name" id="meterReadings">meterReadings</h4>
 
@@ -703,7 +942,7 @@
 
             
                 
-<h4 class="name" id="status">status</h4>
+<h4 class="name" id="statusV2">statusV2</h4>
 
 
 
@@ -772,7 +1011,7 @@
 
         <tr>
             
-                <td class="name"><code>status</code></td>
+                <td class="name"><code>statusV2</code></td>
             
 
             <td class="type">
@@ -801,7 +1040,7 @@
 
 
 <div class="description">
-    <p>status is an object containing Smile P1 device information. Note: Only works for V2 firmware!</p>
+    <p>statusV2 is an object containing Smile P1 device information. Note: Only for V2 firmware!</p>
 </div>
 
 
@@ -836,6 +1075,200 @@
 
 
             
+                
+<h4 class="name" id="statusV3">statusV3</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>statusV3</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object containing system information</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description">
+    <p>statusV3 is an object containing Smile P1 device information. Note: Only for V3 firmware!</p>
+</div>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// status
+{ id: '48ac7095f50c4cf19fdfe7d1b66f99ae',
+  created_date: '2019-07-01T08:18:25.458+02:00',
+  modified_date: '2019-07-20T13:58:01.642+02:00',
+  deleted_date: undefined,
+  name: undefined,
+  description: undefined,
+  enabled: true,
+  firmware_locked: false,
+  prevent_default_update: false,
+  last_reset_date: '2019-07-01T08:18:25.458+02:00',
+  last_boot_date: '2019-07-20T13:48:20.466+02:00',
+  vendor_name: 'Plugwise',
+  vendor_model: 'smile',
+  hardware_version: 'AME Smile 2.0 board',
+  firmware_version: '3.3.6',
+  mac_address: 'C49300062A32',
+  short_id: 'hcfrasde',
+  send_data: true,
+  anonymous: false,
+  lan_ip: undefined,
+  wifi_ip: '192.168.1.2',
+  hostname: 'smile082d76',
+  time: '2019-07-20T13:58:05+02:00',
+  timezone: 'Europe/Amsterdam',
+  ssh_relay: 'disabled',
+  project:
+   { id: '123306def5eb4172ae74435aea21e753',
+     name: '-- Stock',
+     description: 'Stock which was previously called fulfillment',
+     is_default: false,
+     visible_in_production: true,
+     deleted_date: undefined,
+     modified_date: '2019-07-20T13:32:44.070+02:00',
+     created_date: '2014-11-19T17:45:10+01:00' },
+  gateway_environment:
+   { id: '00ab027855a44586845028294226da06',
+     savings_result_value: undefined,
+     longitude: undefined,
+     thermostat_model: undefined,
+     city: undefined,
+     country: undefined,
+     electricity_consumption_tariff_structure: undefined,
+     electricity_production_peak_tariff: undefined,
+     central_heating_model: undefined,
+     household_children: 0,
+     thermostat_brand: undefined,
+     electricity_production_off_peak_tariff: undefined,
+     central_heating_installation_date: undefined,
+     postal_code: undefined,
+     electricity_consumption_off_peak_tariff: undefined,
+     latitude: undefined,
+     gas_consumption_tariff: undefined,
+     modified_date:
+      { '0': '2019-07-20T13:32:50.059+02:00',
+        '1': '2019-07-20T13:32:50.059+02:00' },
+     electricity_production_tariff_structure: undefined,
+     housing_construction_period: 'unknown',
+     electricity_production_single_tariff: undefined,
+     electricity_consumption_peak_tariff: undefined,
+     electricity_consumption_single_tariff: undefined,
+     central_heating_brand: undefined,
+     housing_type: 'apartment',
+     currency: 'EUR',
+     savings_result_unit: undefined,
+     household_adults: 0,
+     central_heating_year_of_manufacture: undefined,
+     deleted_date: undefined,
+     created_date: '2019-07-01T08:07:56+02:00' },
+  features:
+   { remote_control:
+      { id: '15f73deb7f6e49df8b2510b816997165',
+        activation_date: '2019-07-03T08:59:26+02:00',
+        validity_period: undefined,
+        valid_to: undefined,
+        valid_from: undefined,
+        grace_period: undefined,
+        deleted_date: undefined,
+        modified_date: '2019-07-20T13:32:44.111+02:00',
+        created_date: '2019-07-03T08:59:26+02:00' } } }</code></pre>
+
+
+
+            
     
 
     
@@ -853,7 +1286,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Fri Jun 14 2019 12:52:49 GMT+0200 (GMT+02:00) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Sun Jul 21 2019 10:06:12 GMT+0200 (GMT+02:00) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

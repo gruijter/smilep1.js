@@ -51,9 +51,29 @@ async function setupSession(opts) {
 async function doTest() {
 	try {
 
+		// try to discover (V3 only)
+		log.push('trying to discover V3 Smile...');
+		const info = await smile.discover()
+			.catch((error) => {
+				log.push(error.message);
+				errorCount += 1;
+			});
+		log.push(info);
+		log.push(`t = ${(Date.now() - t0) / 1000}`);
+
 		// for other methods you first need to be logged in.
 		log.push('trying to login...');
-		const status = await smile.login();
+		const loggedIn = await smile.login();
+		log.push(loggedIn);
+		log.push(`t = ${(Date.now() - t0) / 1000}`);
+
+		// get device info
+		log.push('trying to get device info');
+		const status = await smile.getStatus()
+			.catch((error) => {
+				log.push(error.message);
+				errorCount += 1;
+			});
 		log.push(status);
 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 

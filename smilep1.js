@@ -15,7 +15,7 @@ const https = require('https');
 // v2 and v3 firmware
 const modulesPath = '/core/modules';
 const objectsPath = '/core/direct_objects';
-const domainObjectsPath = '/core/domain_objects';
+// const domainObjectsPath = '/core/domain_objects';
 // const enumerationPath = '/core/enumerations';
 
 // v2 firmware only:
@@ -28,8 +28,12 @@ const statusPath = '/system/status/xml';
 
 // v3 firmware only:
 const gatewayPath = '/core/domain_objects;class=Gateway'; // class=Module Appliance Location
-const servicesPath = '/core/modules;class=Services';
+// const servicesPath = '/core/modules;class=Services';
+const discoveryPath = '/proxy/auth/announce'; // 'https://connect.plugwise.net/proxy/auth/announce/SMILEID.json?_=1563626014476'
+// const wifiScanPath = '/core/gateways/network;@scan';
+// const networkInfoPath = '/core/gateways/network';
 
+const defaultHost = 'connect.plugwise.net';
 const defaultPort = 80;
 const defaultTimeout = 4000;
 
@@ -45,12 +49,45 @@ const regexGasTm = new RegExp(/<measurement log_date='(.*?)' unit='m3' direction
 const regexFwLevel2 = new RegExp(/<version>(.*?)<\/version>/);
 const regexFwLevel3 = new RegExp(/<firmware_version>(.*?)<\/firmware_version>/);
 
+const flatten = async (json, level) => {
+	try {
+		const lvl = level ? level + 1 : 1;
+		if (lvl > 10) return json;
+		const flat = {};
+		Object.keys(json).forEach(async (key) => {
+			if (key === '_attributes') {
+				Object.keys(json[key]).forEach((attr) => {
+					flat[attr] = json[key][attr];
+				});
+				return;
+			}
+			flat[key] = json[key];
+			if (Object.keys(json[key]).length === 0) {
+				flat[key] = undefined;
+				return;
+			}
+			if (Object.keys(json[key]).length === 1) {
+				if (Object.prototype.hasOwnProperty.call(json[key], '_text')) {
+					flat[key] = json[key]._text;
+				} else {
+					flat[key] = await flatten(json[key], lvl);
+				}
+				return;
+			}
+			flat[key] = await flatten(json[key], lvl);
+		});
+		return Promise.resolve(flat);
+	} catch (error) {
+		return Promise.reject(error);
+	}
+};
+
 class SmileP1 {
 	// Represents a session to a Plugwise Smile P1 device.
 	constructor(opts) {	// id, host, port, timeout, meterMethod
 		const options = opts || {};
 		this.id = options.id;
-		this.host = options.host;
+		this.host = options.host || defaultHost;
 		this.port = options.port || defaultPort;
 		this.timeout = options.timeout || defaultTimeout;
 		this.loggedIn = true;
@@ -71,11 +108,58 @@ class SmileP1 {
 			this.host = options.host || this.host;
 			this.port = options.port || this.port;
 			this.timeout = options.timeout || this.timeout;
+			// get IP address when using connect.plugwise.net
+			if (!this.host || this.host === defaultHost) {
+				await this.discoverV3();
+			}
 			await this.getFirmwareLevel();
 			this.loggedIn = true;
 			return Promise.resolve(this.loggedIn);
 		} catch (error) {
 			this.loggedIn = false;
+			return Promise.reject(error);
+		}
+	}
+
+	/**
+	* Discover a Plugwise device in your local network (internet connection required)
+	* @param {discoverOptions} [options] - configurable discovery options
+ 	* @returns {Promise.<discoverInfo>} The device information.
+	*/
+	async discover(opts) {
+		try {
+			const opts2 = opts || {};
+			const id = opts2.id || this.id;
+			const postMessage = '';
+			const headers = {
+				'cache-control': 'no-cache',
+				'user-agent': 'node-smilep1js',
+				'content-length': Buffer.byteLength(postMessage),
+				connection: 'Keep-Alive',
+			};
+			const options = {
+				hostname: defaultHost,
+				port: 443,
+				path: `${discoveryPath}/${id}.json`,
+				headers,
+				method: 'GET',
+			};
+			const result = await this._makeHttpsRequest(options, postMessage);
+			if (result.statusCode === 404) {
+				throw Error('Discovery failed possibly due to incorrect ID.');
+			}
+			if (result.statusCode !== 200 && result.statusCode) {
+				this.lastResponse = result.statusCode;
+				throw Error(`Discovery Failed. Status Code: ${result.statusCode}`);
+			}
+			const contentType = result.headers['content-type'];
+			if (!/^application\/json/.test(contentType)) {
+				throw Error(`Discovery failed. Expected application/json but received ${contentType}`);
+			}
+			const info = JSON.parse(result.body);
+			this.host = info.lan_ip || info.wifi_ip;
+			return Promise.resolve(info);
+		} catch (error) {
 			return Promise.reject(error);
 		}
 	}
@@ -105,28 +189,50 @@ class SmileP1 {
 	}
 
 	/**
-	* Get the meterMethod. Returns 1 for firmware below 3, returns 2 otherwise
-	* @returns {Promise.<meterMethod>} The meter Method.
+	* Get the deviceInfo. The returned device info depends on fw level
+	* @returns {(Promise.<statusV2>|Promise.<statusV3>)} The device info depends on fw level
 	*/
-	async getMeterMethod() {
+	async getStatus() {
 		try {
-			this.getFirmwareLevel();
+			let status = {};
 			if (typeof this.firmwareLevel === 'string') {
-				if (this.firmwareLevel[0] <= 2) {
-					this.meterMethod = 1;
-				} else { this.meterMethod = 2; }
+				if (this.firmwareLevel[0] >= 3) {
+					status = await this._getStatusV3();
+				} else { status = await this._getStatusV2(); }
 			}
-			return Promise.resolve(this.meterMethod);
+			return Promise.resolve(status);
 		} catch (error) {
 			return Promise.reject(error);
 		}
 	}
 
 	/**
-	* Get status information of the Smile P1 device. (V2 firmware only)
-	* @returns {Promise.<status>} The status information.
+	* Get the power  and gas meter readings.
+	* @returns {Promise<meterReadings>}
 	*/
-	async getStatus() {
+	async getMeterReadings() {
+		try {
+			if (!this.meterMethod) {
+				await this._getMeterMethod();
+			}
+			let readings = {};
+			// method 1 for fw 2
+			if (this.meterMethod === 1) {
+				readings = await this._getMeterReadings1();
+			} else {	// method 2 as default
+				readings = await this._getMeterReadings2();
+			}
+			return Promise.resolve(readings);
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	}
+
+	// /**
+	// * Get status V2 information of the Smile P1 device. (V2 firmware only)
+	// * @returns {Promise.<statusV2>} The status information.
+	// */
+	async _getStatusV2() {
 		try {
 			const result = await this._makeRequest(statusPath);
 			// parse xml to json object
@@ -147,24 +253,39 @@ class SmileP1 {
 		}
 	}
 
-	/**
-	* Get the power  and gas meter readings.
-	* @returns {Promise<meterReadings>}
-	*/
-	async getMeterReadings() {
+	// /**
+	// * Get status V3 information of the Smile P1 device. (V3 firmware only)
+	// * @returns {Promise.<statusV3>} The status information.
+	// */
+	async _getStatusV3() {
 		try {
-			if (!this.meterMethod) {
-				await this.getMeterMethod();
+			const result = await this._makeRequest(gatewayPath, true);
+			// parse xml to json object
+			const parseOptions = {
+				compact: true, nativeType: true, ignoreDeclaration: true, // ignoreAttributes: true, // spaces: 2,
+			};
+			const json = parseXml.xml2js(result, parseOptions);
+			const raw = json.domain_objects.gateway;
+			const state = await flatten(raw);
+			return Promise.resolve(state);
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	}
+
+	// /**
+	// * Get the meterMethod. Returns 1 for firmware below 3, returns 2 otherwise
+	// * @returns {Promise.<meterMethod>} The meter Method.
+	// */
+	async _getMeterMethod() {
+		try {
+			await this.getFirmwareLevel();
+			if (typeof this.firmwareLevel === 'string') {
+				if (this.firmwareLevel[0] <= 2) {
+					this.meterMethod = 1;
+				} else { this.meterMethod = 2; }
 			}
-			let readings = {};
-			// method 1 for fw 2
-			if (this.meterMethod === 1) {
-				readings = await this._getMeterReadings1()
-					.catch(() => undefined);
-			} else {	// method 2 as default
-				readings = await this._getMeterReadings2();
-			}
-			return Promise.resolve(readings);
+			return Promise.resolve(this.meterMethod);
 		} catch (error) {
 			return Promise.reject(error);
 		}
@@ -189,7 +310,7 @@ class SmileP1 {
 				readings.n2 = powerPeakProduced;
 				readings.n1 = powerOffpeakProduced;
 				readings.tm = powerTm;
-			}	catch (err) {
+			} catch (err) {
 				// console.log('Error parsing power information, or no power readings available');
 			}
 			try {
@@ -197,7 +318,7 @@ class SmileP1 {
 				const gasTm = Date.parse(regexGasTm.exec(result)[1]);
 				readings.gas = gas;
 				readings.gtm = gasTm;
-			}	catch (err) {
+			} catch (err) {
 				// console.log('Error parsing gas information, or no gas readings available');
 			}
 			if (!readings.tm && !readings.gtm) {
@@ -228,7 +349,6 @@ class SmileP1 {
 			};
 			const json = parseXml.xml2js(result, parseOptions);
 			const logs = json.direct_objects.location.logs;
-			// console.log(logs);
 			try {
 				logs.cumulative_log.forEach((log) => {
 					if (log.type._text === 'electricity_consumed') {
@@ -319,7 +439,7 @@ class SmileP1 {
 				this.lastResponse = result.statusCode;
 				throw Error('401 Unauthorized (wrong smileId or wrong IP)');
 			}
-			if (result.statusCode !== 200) {
+			if (result.statusCode !== 200 && result.statusCode) {
 				this.lastResponse = result.statusCode;
 				throw Error(`HTTP request Failed. Status Code: ${result.statusCode}`);
 			}
@@ -431,6 +551,14 @@ module.exports = SmileP1;
 */
 
 /**
+* @typedef discoverOptions
+* @description Set of configurable options to use during discovery
+* @property {string} id - The short ID of the Smile P1.
+* @example // discovery options
+{ id: 'hcfrasde' }
+*/
+
+/**
 * @typedef meterReadings
 * @description meterReadings is an object containing power and gas information.
 * @property {number} pwr power meter total (consumption - production) in kWh. e.g. 7507.336
@@ -455,9 +583,9 @@ module.exports = SmileP1;
 */
 
 /**
-* @typedef status
-* @description status is an object containing Smile P1 device information. Note: Only works for V2 firmware!
-* @property {object} status Object containing system information
+* @typedef statusV2
+* @description statusV2 is an object containing Smile P1 device information. Note: Only for V2 firmware!
+* @property {object} statusV2 Object containing system information
 * @example // status
 { system:
    { product: 'smile',
@@ -478,6 +606,107 @@ module.exports = SmileP1;
      ssid: 'MyWifi',
      mode: 'sta',
      link_quality: -35 } }
+*/
+
+/**
+* @typedef statusV3
+* @description statusV3 is an object containing Smile P1 device information. Note: Only for V3 firmware!
+* @property {object} statusV3 Object containing system information
+* @example // status
+{ id: '48ac7095f50c4cf19fdfe7d1b66f99ae',
+  created_date: '2019-07-01T08:18:25.458+02:00',
+  modified_date: '2019-07-20T13:58:01.642+02:00',
+  deleted_date: undefined,
+  name: undefined,
+  description: undefined,
+  enabled: true,
+  firmware_locked: false,
+  prevent_default_update: false,
+  last_reset_date: '2019-07-01T08:18:25.458+02:00',
+  last_boot_date: '2019-07-20T13:48:20.466+02:00',
+  vendor_name: 'Plugwise',
+  vendor_model: 'smile',
+  hardware_version: 'AME Smile 2.0 board',
+  firmware_version: '3.3.6',
+  mac_address: 'C49300062A32',
+  short_id: 'hcfrasde',
+  send_data: true,
+  anonymous: false,
+  lan_ip: undefined,
+  wifi_ip: '192.168.1.2',
+  hostname: 'smile082d76',
+  time: '2019-07-20T13:58:05+02:00',
+  timezone: 'Europe/Amsterdam',
+  ssh_relay: 'disabled',
+  project:
+   { id: '123306def5eb4172ae74435aea21e753',
+     name: '-- Stock',
+     description: 'Stock which was previously called fulfillment',
+     is_default: false,
+     visible_in_production: true,
+     deleted_date: undefined,
+     modified_date: '2019-07-20T13:32:44.070+02:00',
+     created_date: '2014-11-19T17:45:10+01:00' },
+  gateway_environment:
+   { id: '00ab027855a44586845028294226da06',
+     savings_result_value: undefined,
+     longitude: undefined,
+     thermostat_model: undefined,
+     city: undefined,
+     country: undefined,
+     electricity_consumption_tariff_structure: undefined,
+     electricity_production_peak_tariff: undefined,
+     central_heating_model: undefined,
+     household_children: 0,
+     thermostat_brand: undefined,
+     electricity_production_off_peak_tariff: undefined,
+     central_heating_installation_date: undefined,
+     postal_code: undefined,
+     electricity_consumption_off_peak_tariff: undefined,
+     latitude: undefined,
+     gas_consumption_tariff: undefined,
+     modified_date:
+      { '0': '2019-07-20T13:32:50.059+02:00',
+        '1': '2019-07-20T13:32:50.059+02:00' },
+     electricity_production_tariff_structure: undefined,
+     housing_construction_period: 'unknown',
+     electricity_production_single_tariff: undefined,
+     electricity_consumption_peak_tariff: undefined,
+     electricity_consumption_single_tariff: undefined,
+     central_heating_brand: undefined,
+     housing_type: 'apartment',
+     currency: 'EUR',
+     savings_result_unit: undefined,
+     household_adults: 0,
+     central_heating_year_of_manufacture: undefined,
+     deleted_date: undefined,
+     created_date: '2019-07-01T08:07:56+02:00' },
+  features:
+   { remote_control:
+      { id: '15f73deb7f6e49df8b2510b816997165',
+        activation_date: '2019-07-03T08:59:26+02:00',
+        validity_period: undefined,
+        valid_to: undefined,
+        valid_from: undefined,
+        grace_period: undefined,
+        deleted_date: undefined,
+        modified_date: '2019-07-20T13:32:44.111+02:00',
+        created_date: '2019-07-03T08:59:26+02:00' } } }
+*/
+
+/**
+* @typedef discoverInfo
+* @description discoverInfo is an object containing Smile P1 device information.
+* @property {object} discoverInfo Object containing system information
+* @example // status
+{ product: 'smile',
+  version: '3.3.6',
+  lan_ip: '',
+  wifi_ip: '192.168.1.2',
+  timestamp: '2019-07-20T14:58:38+02:00',
+  zoneinfo: '',
+  rest_root: '/',
+  server_timestamp: '2019-07-20T12:58:38+00:00' }
 */
 
 /*

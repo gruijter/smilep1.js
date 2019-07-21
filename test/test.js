@@ -29,7 +29,7 @@ Object.keys(args).forEach((arg) => {
 if (Object.keys(options).length === 0) {
 	options.id = process.argv[2];
 	options.host = process.argv[3];
-	options.port = process.argv[4];
+	options.port = process.argv[4] || 80;
 }
 
 if (options.port) {
