@@ -51,8 +51,8 @@ async function setupSession(opts) {
 async function doTest() {
 	try {
 
-		// try to discover (V3 only)
-		log.push('trying to discover V3 Smile...');
+		// try to discover
+		log.push('trying to discover Smile...');
 		const info = await smile.discover()
 			.catch((error) => {
 				log.push(error.message);

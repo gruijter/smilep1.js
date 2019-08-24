@@ -110,7 +110,7 @@ class SmileP1 {
 			this.timeout = options.timeout || this.timeout;
 			// get IP address when using connect.plugwise.net
 			if (!this.host || this.host === defaultHost) {
-				await this.discoverV3();
+				await this.discover();
 			}
 			await this.getFirmwareLevel();
 			this.loggedIn = true;
@@ -386,7 +386,7 @@ class SmileP1 {
 					}
 				});
 			} catch (err) {
-				console.log(JSON.stringify(logs));
+				// console.log(JSON.stringify(logs));
 				throw err;
 			}
 			readings.pwr = measurePower - measurePowerProduced;
