@@ -1,6 +1,6 @@
 {
   "name": "smilep1",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Node package to interface directly with Plugwise Smile P1 energy monitor devices (no Stretch or bridge required)",
   "main": "smilep1.js",
   "scripts": {

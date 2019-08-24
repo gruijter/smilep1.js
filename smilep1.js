@@ -302,9 +302,9 @@ class SmileP1 {
 				const powerOffpeak = Number(regexPowerOffpeak.exec(result)[1]) / 1000;
 				const powerPeakProduced = Number(regexPowerPeakProduced.exec(result)[1]) / 1000;
 				const powerOffpeakProduced = Number(regexPowerOffpeakProduced.exec(result)[1]) / 1000;
-				const powerTm = Date.parse(regexPowerTm.exec(result)[1]);
+				const powerTm = Date.parse(regexPowerTm.exec(result)[1]) / 1000;
 				readings.pwr = measurePower - measurePowerProduced;
-				readings.net = powerPeak + powerOffpeak - powerPeakProduced - powerOffpeakProduced;
+				readings.net = Math.round(10000 * (powerPeak + powerOffpeak - powerPeakProduced - powerOffpeakProduced)) / 10000;
 				readings.p2 = powerPeak;
 				readings.p1 = powerOffpeak;
 				readings.n2 = powerPeakProduced;
@@ -315,7 +315,7 @@ class SmileP1 {
 			}
 			try {
 				const gas = Number(regexGas.exec(result)[1]);
-				const gasTm = Date.parse(regexGasTm.exec(result)[1]);
+				const gasTm = Date.parse(regexGasTm.exec(result)[1]) / 1000;
 				readings.gas = gas;
 				readings.gtm = gasTm;
 			} catch (err) {
@@ -390,14 +390,14 @@ class SmileP1 {
 				throw err;
 			}
 			readings.pwr = measurePower - measurePowerProduced;
-			readings.net = powerPeak + powerOffpeak - powerPeakProduced - powerOffpeakProduced;
+			readings.net = Math.round(10000 * (powerPeak + powerOffpeak - powerPeakProduced - powerOffpeakProduced)) / 10000;
 			readings.p2 = powerPeak;
 			readings.p1 = powerOffpeak;
 			readings.n2 = powerPeakProduced;
 			readings.n1 = powerOffpeakProduced;
-			readings.tm = Date.parse(new Date(powerTm));
+			readings.tm = Date.parse(new Date(powerTm)) / 1000;
 			readings.gas = gas;
-			readings.gtm = Date.parse(new Date(gasTm));
+			readings.gtm = Date.parse(new Date(gasTm)) / 1000;
 			return Promise.resolve(readings);
 		} catch (error) {
 			return Promise.reject(error);
@@ -577,9 +577,9 @@ module.exports = SmileP1;
 	p1: 3161.826,
 	n2: 400.407,
 	n1: 794.394,
-	tm: 1560178800000,
+	tm: 1560178800,
 	gas: 2162.69,
-	gtm: 1560178800000 }
+	gtm: 1560178800 }
 */
 
 /**
@@ -781,7 +781,7 @@ meter JSON:
      powerPeakProduced: 2979.339,
      powerOffpeakProduced: 1100.755,
      powerTm: 1490625300000 },
-  g: { gas: 4977.361, gasTm: 1490623200000 }
+  g: { gas: 4977.361, gasTm: 1490623200 }
 }
 
 
