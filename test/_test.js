@@ -48,7 +48,7 @@ async function setupSession(opts) {
 // 	return {};
 // }
 
-async function doTest() {
+async function doTest(opts) {
 	try {
 
 		// try to discover
@@ -63,7 +63,7 @@ async function doTest() {
 
 		// for other methods you first need to be logged in.
 		log.push('trying to login...');
-		const loggedIn = await smile.login();
+		const loggedIn = await smile.login(opts);
 		log.push(loggedIn);
 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
@@ -107,7 +107,7 @@ exports.test = async (opts) => {
 	log = [];	// empty the log
 	try {
 		await setupSession(opts);
-		await doTest();
+		await doTest(opts);
 		return Promise.resolve(log);
 	}	catch (error) {
 		return Promise.resolve(log);
