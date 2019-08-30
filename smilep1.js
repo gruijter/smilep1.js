@@ -15,6 +15,8 @@ const https = require('https');
 // v2 and v3 firmware
 const modulesPath = '/core/modules';
 const objectsPath = '/core/direct_objects';
+const logsPath = '/core/locations/logs';
+
 // const domainObjectsPath = '/core/domain_objects';
 // const enumerationPath = '/core/enumerations';
 
@@ -32,6 +34,7 @@ const gatewayPath = '/core/domain_objects;class=Gateway'; // class=Module Applia
 const discoveryPath = '/proxy/auth/announce'; // 'https://connect.plugwise.net/proxy/auth/announce/SMILEID.json?_=1563626014476'
 // const wifiScanPath = '/core/gateways/network;@scan';
 // const networkInfoPath = '/core/gateways/network';
+const rebootPath = '/core/gateways;@reboot';
 
 const defaultHost = 'connect.plugwise.net';
 const defaultPort = 80;
@@ -64,6 +67,10 @@ const flatten = async (json, level) => {
 			flat[key] = json[key];
 			if (Object.keys(json[key]).length === 0) {
 				flat[key] = undefined;
+				if (key === '_text') {
+					delete flat[key];
+					flat.value = json[key];
+				}
 				return;
 			}
 			if (Object.keys(json[key]).length === 1) {
@@ -223,6 +230,81 @@ class SmileP1 {
 				readings = await this._getMeterReadings2();
 			}
 			return Promise.resolve(readings);
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	}
+
+	/**
+	* Get the power and gas log history.
+	* @param {logsOptions} [options] - configurable Logs options
+	* @returns {Promise<meterLogs>}
+	*/
+	async getLogs(opts) {
+		try {
+			const options = opts || {};
+			let path = logsPath;
+
+			const today = new Date(new Date().setHours(0, 0, 0, 0));
+			const toDefault = JSON.stringify(today).replace(/"/g, '');
+			const startMonth = new Date(today.setDate(1));
+			const fromDefault = JSON.stringify(startMonth).replace(/"/g, '');
+
+			const logClass = options.logFunctionality || 'IntervalLogFunctionality';
+			const type = options.type || 'electricity_consumed';
+			const typeString = type ? `type=${type}` : '';
+			const from = options.from || fromDefault;
+			const to = options.to || toDefault;
+			const interval = options.interval || 'P1D'; // 'PT1H'; // e.g. 'PT1H' or 'PT15M' or 'PT300S' etc.
+			path = `${path};class:eq:${logClass};${typeString};@from=${from};@to=${to};@interval=${interval}`;
+			const result = await this._makeRequest(path);
+			// parse xml to json object
+			const parseOptions = {
+				compact: true, nativeType: true, ignoreDeclaration: true, // ignoreAttributes: true, // spaces: 2,
+			};
+			const json = parseXml.xml2js(result, parseOptions);
+			const raw = json.locations.location.logs;
+			const logs = await flatten(raw);
+			return Promise.resolve(logs);
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	}
+
+	/**
+	* Reboot to the Smile P1. (V3 firmware only)
+	* @returns {Promise.<rebootStarted>} The rebooted state.
+	*/
+	async reboot() {
+		try {
+			const actionPath = rebootPath;
+			const postMessage = '';
+			const headers = {
+				'cache-control': 'no-cache',
+				'user-agent': 'node-smilep1js',
+				// 'content-type': 'multipart/form-data',
+				'content-length': Buffer.byteLength(postMessage),
+				connection: 'Keep-Alive',
+			};
+			const options = {
+				hostname: this.host,
+				port: this.port,
+				path: actionPath,
+				auth: `smile:${this.id}`,
+				headers,
+				method: 'POST',
+			};
+			let result;
+			if (options.port === 443) {
+				result = await this._makeHttpsRequest(options, postMessage);
+			} else {
+				result = await this._makeHttpRequest(options, postMessage);
+			}
+			if (!result.headers || !JSON.stringify(result.headers).includes('Plugwise')) {
+				throw Error('reboot failed');
+			}
+			this.loggedIn = false;
+			return Promise.resolve(true);
 		} catch (error) {
 			return Promise.reject(error);
 		}
@@ -559,6 +641,23 @@ module.exports = SmileP1;
 */
 
 /**
+* @typedef logsOptions
+* @description Set of configurable options to use during logs retrieval
+* @property {string} [from] - start of logs in zulu time '2019-07-01T22:00:00.000Z'. Defaults to this month.
+* @property {string} [to] - end of logs in zulu time '2019-07-31T22:00:00.000Z'. Defaults to this month.
+* @property {string} [type = 'electricity_consumed'] - meter type(s) to include e.g. 'electricity_consumed,electricity_produced,gas_consumed'.
+* @property {string} [interval = 'P1D'] - interval of logs e.g. 'P1D', 'PT1H','PT15M' or 'PT300S'. Defaults to 1 day ('P1D').
+* @property {string} [logClass = 'IntervalLogFunctionality'] - class(es) to include e.g. 'IntervalLogFunctionality,CumulativeLogFunctionality,PointLogFunctionality'
+* @example // logs retrieval options
+{ from: '2019-07-20T22:00:00.000Z',
+  to: '2019-07-21T22:00:00.000Z',
+  type: 'electricity_consumed,electricity_produced'},
+  interval: 'PT5M',
+  logClass: 'IntervalLogFunctionality, PointLogFunctionality'
+}
+*/
+
+/**
 * @typedef meterReadings
 * @description meterReadings is an object containing power and gas information.
 * @property {number} pwr power meter total (consumption - production) in kWh. e.g. 7507.336
@@ -708,6 +807,182 @@ module.exports = SmileP1;
   rest_root: '/',
   server_timestamp: '2019-07-20T12:58:38+00:00' }
 */
+
+/**
+* @typedef meterLogs
+* @description meterLogs is an object containing Smile P1 historic log information.
+* @property {object} meterLogs Object containing logs
+* @example // meterLogs
+{ interval_log:
+   { id: 'a17aa51dda834556905f3ea1689d18f7',
+     unit: 'Wh',
+     type: 'electricity_consumed',
+     interval: 'PT15M',
+     last_consecutive_log_date: '2019-08-24T17:45:00+02:00',
+     updated_date: '2019-08-24T17:45:00+02:00',
+     period:
+      { start_date: '2019-07-21T00:00:00.000+02:00',
+        end_date: '2019-07-21T23:00:00.000+02:00',
+        interval: 'PT1H',
+        measurement:
+         { '0':
+            { log_date: '2019-07-21T00:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 228 },
+           '1':
+            { log_date: '2019-07-21T01:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 214 },
+           '2':
+            { log_date: '2019-07-21T02:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 197 },
+           '3':
+            { log_date: '2019-07-21T03:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 202 },
+           '4':
+            { log_date: '2019-07-21T04:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 218 },
+           '5':
+            { log_date: '2019-07-21T05:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 196 },
+           '6':
+            { log_date: '2019-07-21T06:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 209 },
+           '7':
+            { log_date: '2019-07-21T07:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 154 },
+           '8':
+            { log_date: '2019-07-21T08:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 262 },
+           '9':
+            { log_date: '2019-07-21T09:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 38 },
+           '10':
+            { log_date: '2019-07-21T09:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 756 },
+           '11':
+            { log_date: '2019-07-21T10:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '12':
+            { log_date: '2019-07-21T10:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '13':
+            { log_date: '2019-07-21T11:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '14':
+            { log_date: '2019-07-21T11:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '15':
+            { log_date: '2019-07-21T12:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '16':
+            { log_date: '2019-07-21T12:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '17':
+            { log_date: '2019-07-21T13:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '18':
+            { log_date: '2019-07-21T13:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '19':
+            { log_date: '2019-07-21T14:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '20':
+            { log_date: '2019-07-21T14:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '21':
+            { log_date: '2019-07-21T15:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '22':
+            { log_date: '2019-07-21T15:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '23':
+            { log_date: '2019-07-21T16:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '24':
+            { log_date: '2019-07-21T16:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '25':
+            { log_date: '2019-07-21T17:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '26':
+            { log_date: '2019-07-21T17:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '27':
+            { log_date: '2019-07-21T18:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '28':
+            { log_date: '2019-07-21T18:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '29':
+            { log_date: '2019-07-21T19:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '30':
+            { log_date: '2019-07-21T19:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 132 },
+           '31':
+            { log_date: '2019-07-21T20:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '32':
+            { log_date: '2019-07-21T20:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '33':
+            { log_date: '2019-07-21T21:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '34':
+            { log_date: '2019-07-21T21:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '35':
+            { log_date: '2019-07-21T22:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '36':
+            { log_date: '2019-07-21T22:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '37':
+            { log_date: '2019-07-21T23:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '38':
+            { log_date: '2019-07-21T23:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 } } } } }
+*/
+
 
 /*
 meter xml:

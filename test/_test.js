@@ -77,6 +77,25 @@ async function doTest(opts) {
 		log.push(status);
 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
+		// get meter logs
+		log.push('trying to get historic Power log of present month');
+		const logsE = await smile.getLogs({ type: 'electricity_consumed,electricity_produced' })
+			.catch((error) => {
+				log.push(error.message);
+				errorCount += 1;
+			});
+		log.push(logsE);
+		log.push(`t = ${(Date.now() - t0) / 1000}`);
+
+		log.push('trying to get historic Gas log of present month');
+		const logsG = await smile.getLogs({ type: 'gas_consumed' })
+			.catch((error) => {
+				log.push(error.message);
+				errorCount += 1;
+			});
+		log.push(logsG);
+		log.push(`t = ${(Date.now() - t0) / 1000}`);
+
 		// get meter readings
 		log.push('trying to get meter readings');
 		const readings = await smile.getMeterReadings()
@@ -103,11 +122,46 @@ async function doTest(opts) {
 	}
 }
 
+async function doTest2(opts) {
+	try {
+
+		// for other methods you first need to be logged in.
+		log.push('trying to login...');
+		const loggedIn = await smile.login(opts);
+		log.push(loggedIn);
+		log.push(`t = ${(Date.now() - t0) / 1000}`);
+
+		// reboot
+		log.push('trying to reboot plugwise');
+		const reboot = await smile.reboot()
+			.catch((error) => {
+				log.push(error.message);
+				errorCount += 1;
+			});
+		log.push(reboot);
+		log.push(`t = ${(Date.now() - t0) / 1000}`);
+
+		// finish test
+		smile.lastResponse = '';
+		log.push(smile);
+		if (errorCount) {
+			log.push(`test finished with ${errorCount} errors`);
+		} else {
+			log.push('test finished without errors :)');
+		}
+
+	}	catch (error) {
+		log.push(error);
+		log.push(smile);
+	}
+}
+
 exports.test = async (opts) => {
 	log = [];	// empty the log
 	try {
 		await setupSession(opts);
 		await doTest(opts);
+		// await doTest2(opts);
 		return Promise.resolve(log);
 	}	catch (error) {
 		return Promise.resolve(log);

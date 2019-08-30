@@ -26,7 +26,7 @@
 
 <nav>
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SmileP1.html">SmileP1</a><ul class='methods'><li data-type='method'><a href="SmileP1.html#discover">discover</a></li><li data-type='method'><a href="SmileP1.html#getFirmwareLevel">getFirmwareLevel</a></li><li data-type='method'><a href="SmileP1.html#getMeterReadings">getMeterReadings</a></li><li data-type='method'><a href="SmileP1.html#getStatus">getStatus</a></li><li data-type='method'><a href="SmileP1.html#login">login</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SmileP1.html">SmileP1</a><ul class='methods'><li data-type='method'><a href="SmileP1.html#discover">discover</a></li><li data-type='method'><a href="SmileP1.html#getFirmwareLevel">getFirmwareLevel</a></li><li data-type='method'><a href="SmileP1.html#getLogs">getLogs</a></li><li data-type='method'><a href="SmileP1.html#getMeterReadings">getMeterReadings</a></li><li data-type='method'><a href="SmileP1.html#getStatus">getStatus</a></li><li data-type='method'><a href="SmileP1.html#login">login</a></li><li data-type='method'><a href="SmileP1.html#reboot">reboot</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <div id="main">
@@ -359,6 +359,572 @@
 
             
                 
+<h4 class="name" id="logsOptions">logsOptions</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>from</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>start of logs in zulu time '2019-07-01T22:00:00.000Z'. Defaults to this month.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>to</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>end of logs in zulu time '2019-07-31T22:00:00.000Z'. Defaults to this month.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'electricity_consumed'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>meter type(s) to include e.g. 'electricity_consumed,electricity_produced,gas_consumed'.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>interval</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'P1D'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>interval of logs e.g. 'P1D', 'PT1H','PT15M' or 'PT300S'. Defaults to 1 day ('P1D').</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>logClass</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'IntervalLogFunctionality'</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>class(es) to include e.g. 'IntervalLogFunctionality,CumulativeLogFunctionality,PointLogFunctionality'</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description">
+    <p>Set of configurable options to use during logs retrieval</p>
+</div>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// logs retrieval options
+{ from: '2019-07-20T22:00:00.000Z',
+  to: '2019-07-21T22:00:00.000Z',
+  type: 'electricity_consumed,electricity_produced'},
+  interval: 'PT5M',
+  logClass: 'IntervalLogFunctionality, PointLogFunctionality'
+}</code></pre>
+
+
+
+            
+                
+<h4 class="name" id="meterLogs">meterLogs</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>meterLogs</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object containing logs</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description">
+    <p>meterLogs is an object containing Smile P1 historic log information.</p>
+</div>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// meterLogs
+{ interval_log:
+   { id: 'a17aa51dda834556905f3ea1689d18f7',
+     unit: 'Wh',
+     type: 'electricity_consumed',
+     interval: 'PT15M',
+     last_consecutive_log_date: '2019-08-24T17:45:00+02:00',
+     updated_date: '2019-08-24T17:45:00+02:00',
+     period:
+      { start_date: '2019-07-21T00:00:00.000+02:00',
+        end_date: '2019-07-21T23:00:00.000+02:00',
+        interval: 'PT1H',
+        measurement:
+         { '0':
+            { log_date: '2019-07-21T00:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 228 },
+           '1':
+            { log_date: '2019-07-21T01:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 214 },
+           '2':
+            { log_date: '2019-07-21T02:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 197 },
+           '3':
+            { log_date: '2019-07-21T03:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 202 },
+           '4':
+            { log_date: '2019-07-21T04:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 218 },
+           '5':
+            { log_date: '2019-07-21T05:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 196 },
+           '6':
+            { log_date: '2019-07-21T06:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 209 },
+           '7':
+            { log_date: '2019-07-21T07:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 154 },
+           '8':
+            { log_date: '2019-07-21T08:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 262 },
+           '9':
+            { log_date: '2019-07-21T09:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 38 },
+           '10':
+            { log_date: '2019-07-21T09:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 756 },
+           '11':
+            { log_date: '2019-07-21T10:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '12':
+            { log_date: '2019-07-21T10:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '13':
+            { log_date: '2019-07-21T11:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '14':
+            { log_date: '2019-07-21T11:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '15':
+            { log_date: '2019-07-21T12:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '16':
+            { log_date: '2019-07-21T12:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '17':
+            { log_date: '2019-07-21T13:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '18':
+            { log_date: '2019-07-21T13:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '19':
+            { log_date: '2019-07-21T14:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '20':
+            { log_date: '2019-07-21T14:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '21':
+            { log_date: '2019-07-21T15:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '22':
+            { log_date: '2019-07-21T15:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '23':
+            { log_date: '2019-07-21T16:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '24':
+            { log_date: '2019-07-21T16:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '25':
+            { log_date: '2019-07-21T17:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '26':
+            { log_date: '2019-07-21T17:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '27':
+            { log_date: '2019-07-21T18:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '28':
+            { log_date: '2019-07-21T18:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '29':
+            { log_date: '2019-07-21T19:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '30':
+            { log_date: '2019-07-21T19:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 132 },
+           '31':
+            { log_date: '2019-07-21T20:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '32':
+            { log_date: '2019-07-21T20:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '33':
+            { log_date: '2019-07-21T21:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '34':
+            { log_date: '2019-07-21T21:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '35':
+            { log_date: '2019-07-21T22:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '36':
+            { log_date: '2019-07-21T22:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 },
+           '37':
+            { log_date: '2019-07-21T23:00:00.000+02:00',
+              tariff: 'nl_peak',
+              value: 76 },
+           '38':
+            { log_date: '2019-07-21T23:00:00.000+02:00',
+              tariff: 'nl_offpeak',
+              value: 176 } } } } }</code></pre>
+
+
+
+            
+                
 <h4 class="name" id="meterReadings">meterReadings</h4>
 
 
@@ -659,9 +1225,9 @@
 	p1: 3161.826,
 	n2: 400.407,
 	n1: 794.394,
-	tm: 1560178800000,
+	tm: 1560178800,
 	gas: 2162.69,
-	gtm: 1560178800000 }</code></pre>
+	gtm: 1560178800 }</code></pre>
 
 
 
@@ -1286,7 +1852,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Sun Jul 21 2019 10:06:12 GMT+0200 (GMT+02:00) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Fri Aug 30 2019 15:21:30 GMT+0200 (GMT+02:00) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

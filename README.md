@@ -4,7 +4,8 @@
 
 #### get:
 * device information
-* live energy and gas readings of P1 smart meters
+* live energy and gas readings
+* historic logs of energy and gas readings
 
 #### set:
 * nothing (yet)
@@ -12,6 +13,7 @@
 #### do:
 * discover the device in a local network (internet connection to plugwise required)
 * login with device ID
+* reboot the device (V3 firmware only)
 
 ### Note:
 This package has been developed and tested with firmware V2 and V3.
