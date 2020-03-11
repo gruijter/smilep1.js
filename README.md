@@ -4,6 +4,7 @@
 
 #### get:
 * device information
+* network and wifi information
 * live energy and gas readings
 * historic logs of energy and gas readings
 

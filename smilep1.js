@@ -32,8 +32,8 @@ const statusPath = '/system/status/xml';
 const gatewayPath = '/core/domain_objects;class=Gateway'; // class=Module Appliance Location
 // const servicesPath = '/core/modules;class=Services';
 const discoveryPath = '/proxy/auth/announce'; // 'https://connect.plugwise.net/proxy/auth/announce/SMILEID.json?_=1563626014476'
-// const wifiScanPath = '/core/gateways/network;@scan';
-// const networkInfoPath = '/core/gateways/network';
+const networkScanPath = '/core/gateways/network;@scan';
+const interfaceStatusPath = '/core/gateways/network';
 const rebootPath = '/core/gateways;@reboot';
 
 const defaultHost = 'connect.plugwise.net';
@@ -208,6 +208,57 @@ class SmileP1 {
 				} else { status = await this._getStatusV2(); }
 			}
 			return Promise.resolve(status);
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	}
+
+	/**
+	* Get the network interface status. (V3 firmware only)
+	* @returns {Promise.<interfaceStatus>}
+	*/
+	async getInterfaceStatus() {
+		try {
+			const result = await this._makeRequest(interfaceStatusPath);
+			// parse xml to json object
+			const parseOptions = {
+				compact: true, nativeType: true, ignoreDeclaration: true, // ignoreAttributes: true, // spaces: 2,
+			};
+			const json = parseXml.xml2js(result, parseOptions);
+			const raw = json.gateways.gateway.interfaces.interface;
+			const info = await flatten(raw);
+			const interfaceStatus = {};
+			Object.keys(info).forEach((key) => {
+				interfaceStatus[`${info[key].name}`] = info[key];
+			});
+			return Promise.resolve(interfaceStatus);
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	}
+
+	/**
+	* Perform a wifi scan. (V3 firmware only)
+	* @returns {Promise.<WifiScanInfo>}
+	*/
+	async getWifiScan() {
+		try {
+			const result = await this._makeRequest(networkScanPath, false, 15000);
+			// parse xml to json object
+			const parseOptions = {
+				compact: true, nativeType: true, ignoreDeclaration: true, // ignoreAttributes: true, // spaces: 2,
+			};
+			const json = parseXml.xml2js(result, parseOptions);
+			const raw = json.gateways.gateway.interfaces.interface['1'].networks.network;
+			const info = await flatten(raw);
+			const wifiScanInfo = [];
+			Object.keys(info).forEach((key) => {
+				const ap = {
+					ssid: info[key].ssid,
+				};
+				wifiScanInfo.push(Object.assign(ap, info[key].access_points.access_point));
+			});
+			return Promise.resolve(wifiScanInfo);
 		} catch (error) {
 			return Promise.reject(error);
 		}
@@ -431,46 +482,41 @@ class SmileP1 {
 			};
 			const json = parseXml.xml2js(result, parseOptions);
 			const logs = json.direct_objects.location.logs;
-			try {
-				logs.cumulative_log.forEach((log) => {
-					if (log.type._text === 'electricity_consumed') {
-						powerOffpeak = log.period.measurement.filter(m => (m._attributes.tariff_indicator === 'nl_offpeak'
-							|| m._attributes.tariff === 'nl_offpeak'))[0]._text / 1000;
-						powerPeak = log.period.measurement.filter(m => (m._attributes.tariff_indicator === 'nl_peak'
-						|| m._attributes.tariff === 'nl_peak'))[0]._text / 1000;
-						powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
-					}
-					if (log.type._text === 'electricity_produced') {
-						powerOffpeakProduced = log.period.measurement.filter(m => (m._attributes.tariff_indicator === 'nl_offpeak'
+			logs.cumulative_log.forEach((log) => {
+				if (log.type._text === 'electricity_consumed') {
+					powerOffpeak = log.period.measurement.filter((m) => (m._attributes.tariff_indicator === 'nl_offpeak'
 						|| m._attributes.tariff === 'nl_offpeak'))[0]._text / 1000;
-						powerPeakProduced = log.period.measurement.filter(m => (m._attributes.tariff_indicator === 'nl_peak'
-						|| m._attributes.tariff === 'nl_peak'))[0]._text / 1000;
-					}
-					if (log.type._text === 'gas_consumed') {
-						gas = log.period.measurement._text;	// gas
-						gasTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
-					}
-				});
-				logs.point_log.forEach((log) => {
-					if (log.type._text === 'electricity_consumed') {
-						if (Array.isArray(log.period.measurement)) {
-							measurePower = log.period.measurement[1]._text + log.period.measurement[0]._text; // 0=peak, 1=offPeak, or vice versa
-						} else { measurePower = log.period.measurement._text; }
-						// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
-						// readings.tm = Date.parse(new Date(powerTm));
-					}
-					if (log.type._text === 'electricity_produced') {
-						if (Array.isArray(log.period.measurement)) {
-							measurePowerProduced = log.period.measurement[1]._text + log.period.measurement[0]._text;
-						} else { measurePowerProduced = log.period.measurement._text; }
-						// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
-						// readings.tm = Date.parse(new Date(powerTm));
-					}
-				});
-			} catch (err) {
-				// console.log(JSON.stringify(logs));
-				throw err;
-			}
+					powerPeak = log.period.measurement.filter((m) => (m._attributes.tariff_indicator === 'nl_peak'
+					|| m._attributes.tariff === 'nl_peak'))[0]._text / 1000;
+					powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
+				}
+				if (log.type._text === 'electricity_produced') {
+					powerOffpeakProduced = log.period.measurement.filter((m) => (m._attributes.tariff_indicator === 'nl_offpeak'
+					|| m._attributes.tariff === 'nl_offpeak'))[0]._text / 1000;
+					powerPeakProduced = log.period.measurement.filter((m) => (m._attributes.tariff_indicator === 'nl_peak'
+					|| m._attributes.tariff === 'nl_peak'))[0]._text / 1000;
+				}
+				if (log.type._text === 'gas_consumed') {
+					gas = log.period.measurement._text;	// gas
+					gasTm = log.updated_date._text;	// e.g. '2019-02-03T12:00:00+01:00'
+				}
+			});
+			logs.point_log.forEach((log) => {
+				if (log.type._text === 'electricity_consumed') {
+					if (Array.isArray(log.period.measurement)) {
+						measurePower = log.period.measurement[1]._text + log.period.measurement[0]._text; // 0=peak, 1=offPeak, or vice versa
+					} else { measurePower = log.period.measurement._text; }
+					// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
+					// readings.tm = Date.parse(new Date(powerTm));
+				}
+				if (log.type._text === 'electricity_produced') {
+					if (Array.isArray(log.period.measurement)) {
+						measurePowerProduced = log.period.measurement[1]._text + log.period.measurement[0]._text;
+					} else { measurePowerProduced = log.period.measurement._text; }
+					// const powerTm = log.updated_date._text;	// e.g. '2019-02-03T12:03:18+01:00'
+					// readings.tm = Date.parse(new Date(powerTm));
+				}
+			});
 			readings.pwr = measurePower - measurePowerProduced;
 			readings.net = Math.round(10000 * (powerPeak + powerOffpeak - powerPeakProduced - powerOffpeakProduced)) / 10000;
 			readings.p2 = powerPeak;
@@ -486,7 +532,7 @@ class SmileP1 {
 		}
 	}
 
-	async _makeRequest(actionPath, force) {
+	async _makeRequest(actionPath, force, timeout) {
 		try {
 			if (!this.loggedIn && !force) {
 				return Promise.reject(Error('Not logged in'));
@@ -509,9 +555,9 @@ class SmileP1 {
 			};
 			let result;
 			if (options.port === 443) {
-				result = await this._makeHttpsRequest(options, postMessage);
+				result = await this._makeHttpsRequest(options, postMessage, timeout);
 			} else {
-				result = await this._makeHttpRequest(options, postMessage);
+				result = await this._makeHttpRequest(options, postMessage, timeout);
 			}
 			this.lastResponse = result.body;
 			if (result.headers['set-cookie']) {
@@ -806,6 +852,70 @@ module.exports = SmileP1;
   zoneinfo: '',
   rest_root: '/',
   server_timestamp: '2019-07-20T12:58:38+00:00' }
+*/
+
+
+/**
+* @typedef interfaceStatus
+* @description interfaceStatus is an object containing network interface information. Note: Only for V3 firmware!
+* @property {object} interfaceStatus Object containing interface information
+* @example // status
+{ eth0:
+	{ type: 'lan', name: 'eth0', mac: '7825427AB576', state: 'down' },
+   wlan0:
+	{ type: 'wlan',
+	  name: 'wlan0',
+	  power: { unit: 'dBm', value: 21 },
+	  rate: { unit: 'Mb/s', value: 58.5 },
+	  standard: '802.11bgn',
+	  mac: '7825427AB5B1',
+	  encryption: 'wpa2-psk',
+	  mode: 'client',
+	  proto: 'dhcp',
+	  mask: '255.255.255.0',
+	  noise: { unit: 'dBm', value: -95 },
+	  gway: '192.168.1.1',
+	  ssid: 'MyWifi',
+	  channel_width: { unit: 'MHz', value: 20 },
+	  bcast: '192.168.1.255',
+	  signal_strength: { unit: 'dBm', value: -60 },
+	  state: 'up',
+	  channel: 9,
+	  link_quality: '50/70',
+	  ip: '192.168.1.10',
+	  frequency: { unit: 'GHz', value: 2.452 } } }
+*/
+
+/**
+* @typedef wifiScanInfo
+* @description wifiScanInfo is an array containing wifi station information. Note: Only for V3 firmware!
+* @property {array} wifiScanInfo Array containing interface information
+* @example // scanInfo
+[ { ssid: 'myWifi',
+    mac: '7825427AB5B1',
+    encryption: 'wpa2-psk',
+    quality: '63/70',
+    signal_strength: { unit: 'dBm', value: -47 },
+    channel: 5 },
+  { ssid: 'myWifigast',
+    mac: '7825427AB5EA',
+    encryption: 'wpa2-psk',
+    quality: '48/70',
+    signal_strength: { unit: 'dBm', value: -62 },
+    channel: 9 },
+  { ssid: 'REMOTE85',
+    mac: '001DC904DB32',
+    encryption: 'wpa2-psk',
+    quality: '23/70',
+    signal_strength: { unit: 'dBm', value: -87 },
+    channel: 3 },
+  { ssid: 'GoogleHome2732.o',
+    mac: 'F68FCA78294C',
+    encryption: 'open',
+    quality: '59/70',
+    signal_strength: { unit: 'dBm', value: -51 },
+    channel: 5 } ]
+
 */
 
 /**

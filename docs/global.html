@@ -26,7 +26,7 @@
 
 <nav>
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SmileP1.html">SmileP1</a><ul class='methods'><li data-type='method'><a href="SmileP1.html#discover">discover</a></li><li data-type='method'><a href="SmileP1.html#getFirmwareLevel">getFirmwareLevel</a></li><li data-type='method'><a href="SmileP1.html#getLogs">getLogs</a></li><li data-type='method'><a href="SmileP1.html#getMeterReadings">getMeterReadings</a></li><li data-type='method'><a href="SmileP1.html#getStatus">getStatus</a></li><li data-type='method'><a href="SmileP1.html#login">login</a></li><li data-type='method'><a href="SmileP1.html#reboot">reboot</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="SmileP1.html">SmileP1</a><ul class='methods'><li data-type='method'><a href="SmileP1.html#discover">discover</a></li><li data-type='method'><a href="SmileP1.html#getFirmwareLevel">getFirmwareLevel</a></li><li data-type='method'><a href="SmileP1.html#getInterfaceStatus">getInterfaceStatus</a></li><li data-type='method'><a href="SmileP1.html#getLogs">getLogs</a></li><li data-type='method'><a href="SmileP1.html#getMeterReadings">getMeterReadings</a></li><li data-type='method'><a href="SmileP1.html#getStatus">getStatus</a></li><li data-type='method'><a href="SmileP1.html#getWifiScan">getWifiScan</a></li><li data-type='method'><a href="SmileP1.html#login">login</a></li><li data-type='method'><a href="SmileP1.html#reboot">reboot</a></li></ul></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <div id="main">
@@ -354,6 +354,145 @@
     
     <pre class="prettyprint"><code>// discovery options
 { id: 'hcfrasde' }</code></pre>
+
+
+
+            
+                
+<h4 class="name" id="interfaceStatus">interfaceStatus</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>interfaceStatus</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object containing interface information</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description">
+    <p>interfaceStatus is an object containing network interface information. Note: Only for V3 firmware!</p>
+</div>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// status
+{ eth0:
+	{ type: 'lan', name: 'eth0', mac: '7825427AB576', state: 'down' },
+   wlan0:
+	{ type: 'wlan',
+	  name: 'wlan0',
+	  power: { unit: 'dBm', value: 21 },
+	  rate: { unit: 'Mb/s', value: 58.5 },
+	  standard: '802.11bgn',
+	  mac: '7825427AB5B1',
+	  encryption: 'wpa2-psk',
+	  mode: 'client',
+	  proto: 'dhcp',
+	  mask: '255.255.255.0',
+	  noise: { unit: 'dBm', value: -95 },
+	  gway: '192.168.1.1',
+	  ssid: 'MyWifi',
+	  channel_width: { unit: 'MHz', value: 20 },
+	  bcast: '192.168.1.255',
+	  signal_strength: { unit: 'dBm', value: -60 },
+	  state: 'up',
+	  channel: 9,
+	  link_quality: '50/70',
+	  ip: '192.168.1.10',
+	  frequency: { unit: 'GHz', value: 2.452 } } }</code></pre>
 
 
 
@@ -1835,6 +1974,145 @@
 
 
             
+                
+<h4 class="name" id="wifiScanInfo">wifiScanInfo</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>wifiScanInfo</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Array containing interface information</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description">
+    <p>wifiScanInfo is an array containing wifi station information. Note: Only for V3 firmware!</p>
+</div>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// scanInfo
+[ { ssid: 'myWifi',
+    mac: '7825427AB5B1',
+    encryption: 'wpa2-psk',
+    quality: '63/70',
+    signal_strength: { unit: 'dBm', value: -47 },
+    channel: 5 },
+  { ssid: 'myWifigast',
+    mac: '7825427AB5EA',
+    encryption: 'wpa2-psk',
+    quality: '48/70',
+    signal_strength: { unit: 'dBm', value: -62 },
+    channel: 9 },
+  { ssid: 'REMOTE85',
+    mac: '001DC904DB32',
+    encryption: 'wpa2-psk',
+    quality: '23/70',
+    signal_strength: { unit: 'dBm', value: -87 },
+    channel: 3 },
+  { ssid: 'GoogleHome2732.o',
+    mac: 'F68FCA78294C',
+    encryption: 'open',
+    quality: '59/70',
+    signal_strength: { unit: 'dBm', value: -51 },
+    channel: 5 } ]</code></pre>
+
+
+
+            
     
 
     
@@ -1852,7 +2130,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Fri Aug 30 2019 15:21:30 GMT+0200 (GMT+02:00) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a> on Wed Mar 11 2020 21:10:27 GMT+0100 (GMT+01:00) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

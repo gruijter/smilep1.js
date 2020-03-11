@@ -77,6 +77,26 @@ async function doTest(opts) {
 		log.push(status);
 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
+		// getInterfaceStatus
+		log.push('trying to get network interface status');
+		const interfaceStatus = await smile.getInterfaceStatus()
+			.catch((error) => {
+				log.push(error.message);
+				errorCount += 1;
+			});
+		log.push(interfaceStatus);
+		log.push(`t = ${(Date.now() - t0) / 1000}`);
+
+		// get Wifi Scan
+		log.push('trying to get wifi scan info');
+		const wifiScanInfo = await smile.getWifiScan()
+			.catch((error) => {
+				log.push(error.message);
+				errorCount += 1;
+			});
+		log.push(wifiScanInfo);
+		log.push(`t = ${(Date.now() - t0) / 1000}`);
+
 		// get meter logs
 		log.push('trying to get historic Power log of present month');
 		const logsE = await smile.getLogs({ type: 'electricity_consumed,electricity_produced' })
@@ -131,14 +151,14 @@ async function doTest2(opts) {
 		log.push(loggedIn);
 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
-		// reboot
-		log.push('trying to reboot plugwise');
-		const reboot = await smile.reboot()
+		// get Wifi Scan
+		log.push('trying to get wifi scan info');
+		const wifiScanInfo = await smile.getWifiScan()
 			.catch((error) => {
 				log.push(error.message);
 				errorCount += 1;
 			});
-		log.push(reboot);
+		log.push(wifiScanInfo);
 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
 		// finish test
