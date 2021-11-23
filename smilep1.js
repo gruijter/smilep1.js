@@ -583,48 +583,60 @@ class SmileP1 {
 
 	_makeHttpRequest(options, postData, timeout) {
 		return new Promise((resolve, reject) => {
-			const req = http.request(options, (res) => {
+			const opts = options;
+			opts.timeout = timeout || this.timeout;
+			const req = http.request(opts, (res) => {
 				let resBody = '';
 				res.on('data', (chunk) => {
 					resBody += chunk;
 				});
 				res.once('end', () => {
+					this.lastResponse = resBody;
+					if (!res.complete) {
+						return reject(Error('The connection was terminated while the message was still being sent'));
+					}
 					res.body = resBody;
-					return resolve(res); // resolve the request
+					return resolve(res);
 				});
 			});
-			req.setTimeout(timeout || this.timeout, () => {
-				req.abort();
-			});
-			req.once('error', (e) => {
-				this.lastResponse = e;	// e.g. ECONNREFUSED on wrong port or wrong IP // ECONNRESET on wrong IP
+			req.on('error', (e) => {
+				req.destroy();
+				this.lastResponse = e;
 				return reject(e);
 			});
-			// req.write(postData);
+			req.on('timeout', () => {
+				req.destroy();
+			});
 			req.end(postData);
 		});
 	}
 
 	_makeHttpsRequest(options, postData, timeout) {
 		return new Promise((resolve, reject) => {
-			const req = https.request(options, (res) => {
+			const opts = options;
+			opts.timeout = timeout || this.timeout;
+			const req = https.request(opts, (res) => {
 				let resBody = '';
 				res.on('data', (chunk) => {
 					resBody += chunk;
 				});
 				res.once('end', () => {
+					this.lastResponse = resBody;
+					if (!res.complete) {
+						return reject(Error('The connection was terminated while the message was still being sent'));
+					}
 					res.body = resBody;
-					return resolve(res); // resolve the request
+					return resolve(res);
 				});
 			});
-			req.setTimeout(timeout || this.timeout, () => {
-				req.abort();
-			});
-			req.once('error', (e) => {
-				this.lastResponse = e;	// e.g. ECONNREFUSED on wrong port or wrong IP // ECONNRESET on wrong IP
+			req.on('error', (e) => {
+				req.destroy();
+				this.lastResponse = e;
 				return reject(e);
 			});
-			// req.write(postData);
+			req.on('timeout', () => {
+				req.destroy();
+			});
 			req.end(postData);
 		});
 	}
