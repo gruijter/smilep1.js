@@ -28,7 +28,7 @@ To install the Smile P1 package:
 ```
 
 ### Test:
-From the folder in which you installed the SmileP1 package, just run below command. The port only needs to be set if you are not using the default port 80. TLS/SSL will be used when setting port to 443. When no host is entered, autodiscovery will be attempted.
+From the folder in which you installed the SmileP1 package, just run below command. The port only needs to be set if you are not using the default port 80. TLS/SSL will be used when setting port to 443. When no host is entered, autodiscovery will be attempted.  For Belgian P1 meters you need to add `reversed=true`
 ```
 > npm test id=yourDeviceID [host=yourDeviceIP] [port=yourHostPort]
 ```

@@ -142,39 +142,39 @@ async function doTest(opts) {
 	}
 }
 
-async function doTest2(opts) {
-	try {
+// async function doTest2(opts) {
+// 	try {
 
-		// for other methods you first need to be logged in.
-		log.push('trying to login...');
-		const loggedIn = await smile.login(opts);
-		log.push(loggedIn);
-		log.push(`t = ${(Date.now() - t0) / 1000}`);
+// 		// for other methods you first need to be logged in.
+// 		log.push('trying to login...');
+// 		const loggedIn = await smile.login(opts);
+// 		log.push(loggedIn);
+// 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
-		// get Wifi Scan
-		log.push('trying to get wifi scan info');
-		const wifiScanInfo = await smile.getWifiScan()
-			.catch((error) => {
-				log.push(error.message);
-				errorCount += 1;
-			});
-		log.push(wifiScanInfo);
-		log.push(`t = ${(Date.now() - t0) / 1000}`);
+// 		// get Wifi Scan
+// 		log.push('trying to get wifi scan info');
+// 		const wifiScanInfo = await smile.getWifiScan()
+// 			.catch((error) => {
+// 				log.push(error.message);
+// 				errorCount += 1;
+// 			});
+// 		log.push(wifiScanInfo);
+// 		log.push(`t = ${(Date.now() - t0) / 1000}`);
 
-		// finish test
-		smile.lastResponse = '';
-		log.push(smile);
-		if (errorCount) {
-			log.push(`test finished with ${errorCount} errors`);
-		} else {
-			log.push('test finished without errors :)');
-		}
+// 		// finish test
+// 		smile.lastResponse = '';
+// 		log.push(smile);
+// 		if (errorCount) {
+// 			log.push(`test finished with ${errorCount} errors`);
+// 		} else {
+// 			log.push('test finished without errors :)');
+// 		}
 
-	}	catch (error) {
-		log.push(error);
-		log.push(smile);
-	}
-}
+// 	}	catch (error) {
+// 		log.push(error);
+// 		log.push(smile);
+// 	}
+// }
 
 exports.test = async (opts) => {
 	log = [];	// empty the log

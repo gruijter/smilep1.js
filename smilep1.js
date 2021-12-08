@@ -3,7 +3,7 @@
 	License, v. 2.0. If a copy of the MPL was not distributed with this
 	file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-	Copyright 2016 - 2019, Robin de Gruijter <gruijter@hotmail.com> */
+	Copyright 2016 - 2021, Robin de Gruijter <gruijter@hotmail.com> */
 
 'use strict';
 
@@ -38,7 +38,7 @@ const rebootPath = '/core/gateways;@reboot';
 
 const defaultHost = 'connect.plugwise.net';
 const defaultPort = 80;
-const defaultTimeout = 4000;
+const defaultTimeout = 10000;
 
 const regexMeasurePower = new RegExp(/unit='W' directionality='consumed'>(.*?)<\/measurement>/);
 const regexMeasurePowerProduced = new RegExp(/unit='W' directionality='produced'>(.*?)<\/measurement>/);
@@ -98,6 +98,7 @@ class SmileP1 {
 		this.port = options.port || defaultPort;
 		this.timeout = options.timeout || defaultTimeout;
 		this.loggedIn = true;
+		this.reversed = !!options.reversed; // for Belgian meters. Default is false.
 		this.firmwareLevel = undefined;
 		this.meterMethod = options.meterMethod;	// force 1 for fw2, or 2 for fw 3. Will be automaically determined if undefined
 		this.lastResponse = undefined;
@@ -115,6 +116,7 @@ class SmileP1 {
 			this.host = options.host || this.host;
 			this.port = options.port || this.port;
 			this.timeout = options.timeout || this.timeout;
+			this.reversed = Object.prototype.hasOwnProperty.call(opts, 'reversed') ? opts.reversed : this.reversed;
 			// get IP address when using connect.plugwise.net
 			if (!this.host || this.host === defaultHost) {
 				await this.discover();
@@ -457,6 +459,13 @@ class SmileP1 {
 			if (!readings.tm && !readings.gtm) {
 				throw Error('Error parsing meter info');
 			}
+			if (this.reversed) {
+				const tmp = { ...readings };
+				readings.p1 = tmp.p2;
+				readings.p2 = tmp.p1;
+				readings.n1 = tmp.n2;
+				readings.n2 = tmp.n1;
+			}
 			return Promise.resolve(readings);
 		} catch (error) {
 			return Promise.reject(error);
@@ -526,6 +535,13 @@ class SmileP1 {
 			readings.tm = Date.parse(new Date(powerTm)) / 1000;
 			readings.gas = gas;
 			readings.gtm = Date.parse(new Date(gasTm)) / 1000;
+			if (this.reversed) {
+				const tmp = { ...readings };
+				readings.p1 = tmp.p2;
+				readings.p2 = tmp.p1;
+				readings.n1 = tmp.n2;
+				readings.n2 = tmp.n1;
+			}
 			return Promise.resolve(readings);
 		} catch (error) {
 			return Promise.reject(error);
@@ -681,7 +697,8 @@ module.exports = SmileP1;
 * @property {string} id - The short ID of the Smile P1.
 * @property {string} host - The url or ip address of the Smile P1.
 * @property {number} [port = 80] - The port of the Smile P1. Defaults to 80. TLS/SSL will be used when setting port to 443.
-* @property {number} [timeout = 4000] - http(s) timeout in milliseconds. Defaults to 4000ms.
+* @property {number} [timeout = 10000] - http(s) timeout in milliseconds. Defaults to 10000ms.
+ @property {boolean} [reversed = false] - Reverse the peak and offPeak meters. Required in Belgium.
 * @property {number} [meterMethod] - 1 for fw2, 2 for fw 3. Will be automaically determined if undefined.
 * @example // session options
 { id: 'hcfrasde',
@@ -865,7 +882,6 @@ module.exports = SmileP1;
   rest_root: '/',
   server_timestamp: '2019-07-20T12:58:38+00:00' }
 */
-
 
 /**
 * @typedef interfaceStatus
@@ -1105,7 +1121,6 @@ module.exports = SmileP1;
               value: 176 } } } } }
 */
 
-
 /*
 meter xml:
 <modules>
@@ -1181,7 +1196,6 @@ meter JSON:
   g: { gas: 4977.361, gasTm: 1490623200 }
 }
 
-
 firmware XML:
 <update>
 	<firmware>
@@ -1193,7 +1207,6 @@ firmware XML:
 		</upgrade>
 	</firmware>
 </update>
-
 
 domain objects:
 <domain_objects>
