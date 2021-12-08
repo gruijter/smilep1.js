@@ -116,7 +116,7 @@ class SmileP1 {
 			this.host = options.host || this.host;
 			this.port = options.port || this.port;
 			this.timeout = options.timeout || this.timeout;
-			this.reversed = Object.prototype.hasOwnProperty.call(opts, 'reversed') ? opts.reversed : this.reversed;
+			this.reversed = Object.prototype.hasOwnProperty.call(options, 'reversed') ? options.reversed : this.reversed;
 			// get IP address when using connect.plugwise.net
 			if (!this.host || this.host === defaultHost) {
 				await this.discover();
