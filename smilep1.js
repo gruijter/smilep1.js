@@ -3,7 +3,7 @@
 	License, v. 2.0. If a copy of the MPL was not distributed with this
 	file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-	Copyright 2016 - 2021, Robin de Gruijter <gruijter@hotmail.com> */
+	Copyright 2016 - 2023, Robin de Gruijter <gruijter@hotmail.com> */
 
 'use strict';
 
@@ -40,17 +40,17 @@ const defaultHost = 'connect.plugwise.net';
 const defaultPort = 80;
 const defaultTimeout = 10000;
 
-const regexMeasurePower = new RegExp(/unit='W' directionality='consumed'>(.*?)<\/measurement>/);
-const regexMeasurePowerProduced = new RegExp(/unit='W' directionality='produced'>(.*?)<\/measurement>/);
-const regexPowerPeak = new RegExp(/unit='Wh' directionality='consumed' tariff_indicator='nl_peak'>(.*?)<\/measurement>/);
-const regexPowerOffpeak = new RegExp(/unit='Wh' directionality='consumed' tariff_indicator='nl_offpeak'>(.*?)<\/measurement>/);
-const regexPowerPeakProduced = new RegExp(/unit='Wh' directionality='produced' tariff_indicator='nl_peak'>(.*?)<\/measurement>/);
-const regexPowerOffpeakProduced = new RegExp(/unit='Wh' directionality='produced' tariff_indicator='nl_offpeak'>(.*?)<\/measurement>/);
-const regexGas = new RegExp(/unit='m3' directionality='consumed'>(.*?)<\/measurement>/);
-const regexPowerTm = new RegExp(/<measurement log_date='(.*?)' unit='Wh' directionality='consumed' tariff_indicator='nl_offpeak'>/);
-const regexGasTm = new RegExp(/<measurement log_date='(.*?)' unit='m3' directionality='consumed'>/);
-const regexFwLevel2 = new RegExp(/<version>(.*?)<\/version>/);
-const regexFwLevel3 = new RegExp(/<firmware_version>(.*?)<\/firmware_version>/);
+const regexMeasurePower = /unit='W' directionality='consumed'>(.*?)<\/measurement>/;
+const regexMeasurePowerProduced = /unit='W' directionality='produced'>(.*?)<\/measurement>/;
+const regexPowerPeak = /unit='Wh' directionality='consumed' tariff_indicator='nl_peak'>(.*?)<\/measurement>/;
+const regexPowerOffpeak = /unit='Wh' directionality='consumed' tariff_indicator='nl_offpeak'>(.*?)<\/measurement>/;
+const regexPowerPeakProduced = /unit='Wh' directionality='produced' tariff_indicator='nl_peak'>(.*?)<\/measurement>/;
+const regexPowerOffpeakProduced = /unit='Wh' directionality='produced' tariff_indicator='nl_offpeak'>(.*?)<\/measurement>/;
+const regexGas = /unit='m3' directionality='consumed'>(.*?)<\/measurement>/;
+const regexPowerTm = /<measurement log_date='(.*?)' unit='Wh' directionality='consumed' tariff_indicator='nl_offpeak'>/;
+const regexGasTm = /<measurement log_date='(.*?)' unit='m3' directionality='consumed'>/;
+const regexFwLevel2 = /<version>(.*?)<\/version>/;
+const regexFwLevel3 = /<firmware_version>(.*?)<\/firmware_version>/;
 
 const flatten = async (json, level) => {
 	try {
