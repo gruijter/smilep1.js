@@ -1,3 +1,4 @@
+1.7.0 - 14-02-2023 Added 3-phase power info (DSMR4 and higher)
 1.6.2 - 12-02-2023 Fixed test with id.
 1.6.1 - 08-12-2021 Fixed login.
 1.6.0 - 08-12-2021 Added reversed P1 (Belgian meters). Improved test.

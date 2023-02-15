@@ -26,7 +26,7 @@ async function setupSession(opts) {
 	try {
 		log.push('========== STARTING TEST ==========');
 		log.push(`Node version: ${process.version}`);
-		log.push(`Youless package version: ${version}`);
+		log.push(`Smile package version: ${version}`);
 		log.push(`OS: ${os.platform()} ${os.release()}`);
 		Object.keys(opts).forEach((opt) => {
 			smile[opt] = opts[opt];

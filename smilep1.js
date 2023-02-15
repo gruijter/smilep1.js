@@ -484,6 +484,15 @@ class SmileP1 {
 			let powerTm = '0';
 			let gas = 0;
 			let gasTm = '0';
+			let l1c;
+			let l1p;
+			let l2c;
+			let l2p;
+			let l3c;
+			let l3p;
+			let v1;
+			let v2;
+			let v3;
 			const result = await this._makeRequest(objectsPath);
 			// parse xml to json object
 			const parseOptions = {
@@ -511,6 +520,33 @@ class SmileP1 {
 				}
 			});
 			logs.point_log.forEach((log) => {
+				if (log.type._text === 'voltage_phase_one') {
+					v1 = log.period.measurement._text;
+				}
+				if (log.type._text === 'voltage_phase_two') {
+					v2 = log.period.measurement._text;
+				}
+				if (log.type._text === 'voltage_phase_three') {
+					v3 = log.period.measurement._text;
+				}
+				if (log.type._text === 'electricity_phase_one_consumed') {
+					l1c = log.period.measurement._text;
+				}
+				if (log.type._text === 'electricity_phase_one_produced') {
+					l1p = log.period.measurement._text;
+				}
+				if (log.type._text === 'electricity_phase_two_consumed') {
+					l2c = log.period.measurement._text;
+				}
+				if (log.type._text === 'electricity_phase_two_produced') {
+					l2p = log.period.measurement._text;
+				}
+				if (log.type._text === 'electricity_phase_three_consumed') {
+					l3c = log.period.measurement._text;
+				}
+				if (log.type._text === 'electricity_phase_three_produced') {
+					l3p = log.period.measurement._text;
+				}
 				if (log.type._text === 'electricity_consumed') {
 					if (Array.isArray(log.period.measurement)) {
 						measurePower = log.period.measurement[1]._text + log.period.measurement[0]._text; // 0=peak, 1=offPeak, or vice versa
@@ -527,6 +563,15 @@ class SmileP1 {
 				}
 			});
 			readings.pwr = measurePower - measurePowerProduced;
+			readings.l1 = l1c - l1p;
+			readings.l2 = l2c - l2p;
+			readings.l3 = l3c - l3p;
+			readings.v1 = v1;
+			readings.v2 = v2;
+			readings.v3 = v3;
+			readings.i1 = Math.round(100 * (readings.l1 / v1)) / 100;
+			readings.i2 = Math.round(100 * (readings.l2 / v2)) / 100;
+			readings.i3 = Math.round(100 * (readings.l3 / v3)) / 100;
 			readings.net = Math.round(10000 * (powerPeak + powerOffpeak - powerPeakProduced - powerOffpeakProduced)) / 10000;
 			readings.p2 = powerPeak;
 			readings.p1 = powerOffpeak;
@@ -735,8 +780,17 @@ module.exports = SmileP1;
 /**
 * @typedef meterReadings
 * @description meterReadings is an object containing power and gas information.
-* @property {number} pwr power meter total (consumption - production) in kWh. e.g. 7507.336
-* @property {number} net power consumption in Watt. e.g. 3030
+* @property {number} pwr power consumption total in Watt. e.g. 3030
+* @property {number} l1 phase 1 power (Watt), e.g. 1129
+* @property {number} l2 phase 2 power (Watt), e.g. 1129
+* @property {number} l3 phase 3 power (Watt), e.g. 1129
+* @property {number} v1 phase 1 voltage (Volt), e.g. 238
+* @property {number} v2 phase 2 voltage (Volt), e.g. 238
+* @property {number} v3 phase 3 voltage (Volt), e.g. 238
+* @property {number} i1 phase 1 current (Ampere), e.g. 5.01
+* @property {number} i2 phase 2 current (Ampere), e.g. 5.01
+* @property {number} i3 phase 3 current (Ampere), e.g. 5.01
+* @property {number} net energy meter total (consumption - production) in kWh. e.g. 7507.336
 * @property {number} p2 P2 consumption counter (high tariff). e.g. 896.812
 * @property {number} p1 P1 consumption counter (low tariff). e.g. 16110.964
 * @property {number} n2 N2 production counter (high tariff). e.g. 4250.32
@@ -745,15 +799,26 @@ module.exports = SmileP1;
 * @property {number} gas counter gas-meter (in m^3). e.g. 6161.243
 * @property {number} gtm time of the last gas measurement. unix-time-format. e.g. 1542574800
 * @example // meterReadings
-{	pwr: 646,
-	net: 7507.335999999999,
-	p2: 5540.311,
-	p1: 3161.826,
-	n2: 400.407,
-	n1: 794.394,
-	tm: 1560178800,
-	gas: 2162.69,
-	gtm: 1560178800 }
+{
+  pwr: -437,
+  l1: -83,
+  l2: -117,
+  l3: -236,
+  v1: 237,
+  v2: 233,
+  v3: 239,
+  i1: -0.35,
+  i2: -0.5,
+  i3: -0.99,
+  net: -6131.015,
+  p2: 5000.127,
+  p1: 9086.173,
+  n2: 13660.827,
+  n1: 6556.488,
+  tm: 1676472900,
+  gas: 4129.74,
+  gtm: 1659171300
+}
 */
 
 /**
@@ -1207,6 +1272,433 @@ firmware XML:
 		</upgrade>
 	</firmware>
 </update>
+
+domain object DSMR5:
+<?xml version="1.0" encoding="UTF-8"?>
+<domain_objects>
+	<module id='3f1def863355450a93dad674572a2881'>
+		<vendor_name>ENERDIS</vendor_name>
+		<vendor_model>T210-D ESMR5.0</vendor_model>
+		<hardware_version></hardware_version>
+		<firmware_version></firmware_version>
+		<created_date>2019-12-28T14:24:08.766+01:00</created_date>
+		<modified_date>2023-01-10T00:41:16.091+01:00</modified_date>
+		<deleted_date></deleted_date>
+		<services>
+			<electricity_cumulative_meter id='5b42b310575d4a198827559b241639fe' log_type='electricity'>
+				<functionalities><cumulative_log id='4c4ff33fe38d42169458cec9f3979fee'/><cumulative_log id='b969feb771484072bf3259374a022bfa'/></functionalities>
+			</electricity_cumulative_meter>
+			<voltage_meter id='71be021dc36445519186c4e2d52abd12' log_type='voltage_phase_two'>
+				<functionalities><point_log id='b8bced947b2f43269e225462bdd56b1b'/></functionalities>
+			</voltage_meter>
+			<electricity_point_meter id='785d7619437246bbb13c5e61b8424b6b' log_type='electricity_phase_one'>
+				<functionalities><point_log id='0c9e632fe1374c9f987cbe97b327bf1d'/><point_log id='2707e7f55ced481ba304dcf318b4f137'/></functionalities>
+			</electricity_point_meter>
+			<electricity_point_meter id='c9ded4243b2a4117b32cf1bd89edb5be' log_type='electricity_phase_two'>
+				<functionalities><point_log id='0c19e799231547fb97b85934e412887c'/><point_log id='cb5991a238014cd9bc86ba3673e9155f'/></functionalities>
+			</electricity_point_meter>
+			<voltage_meter id='d5694b70b4724263ba1adbee244be1b9' log_type='voltage_phase_three'>
+				<functionalities><point_log id='b0959d7270cd46b99c943fb6565d43ba'/></functionalities>
+			</voltage_meter>
+			<electricity_point_meter id='ecc28e77fbfa4f7f852998358ca1a542' log_type='electricity_phase_three'>
+				<functionalities><point_log id='8b339dc41562480596579127c40f6138'/><point_log id='988b3643ed71435b8e7eb4c9aefd982a'/></functionalities>
+			</electricity_point_meter>
+			<voltage_meter id='ed218585ee79465b96e4f32c7dda1fe1' log_type='voltage_phase_one'>
+				<functionalities><point_log id='308ce3df55804b8aa4dc5c7fba8e5a13'/></functionalities>
+			</voltage_meter>
+			<electricity_interval_meter id='f054c6ca90cd4b4abb210bda171c3da1' log_type='electricity'>
+				<functionalities><interval_log id='2a63d6f706474ce9860e362e1fe87a72'/><interval_log id='448f2a85d91d4f60bdc16f50f569475f'/></functionalities>
+			</electricity_interval_meter>
+			<electricity_point_meter id='f09863d0fe8448578ad7fe36f4c818cf' log_type='electricity'>
+				<functionalities><point_log id='358ef9c4f7414580a2082c4d4899a37f'/><point_log id='f2e1050669df41b6bf0d4c539edadd14'/></functionalities>
+			</electricity_point_meter>
+		</services>
+		<protocols>
+			<dsmr_main id='4192221cab3249a8a5629e61fb405b2f'>
+				<serial>E0048000038005719</serial>
+				<version>50</version>
+				<dsmr_mbuses/>
+				<telegram><![CDATA[/Ene5\T210-D ESMR5.0
+
+1-3:0.2.8(50)
+0-0:1.0.0(230215155733W)
+0-0:96.1.1(4530303438303030303338303035373139)
+1-0:1.8.1(009086.173*kWh)
+1-0:1.8.2(005000.127*kWh)
+1-0:2.8.1(006556.488*kWh)
+1-0:2.8.2(013660.840*kWh)
+0-0:96.14.0(0002)
+1-0:1.7.0(00.000*kW)
+1-0:2.7.0(00.391*kW)
+0-0:96.7.21(00088)
+0-0:96.7.9(00040)
+1-0:99.97.0(10)(0-0:96.7.19)(220523151434S)(0000004058*s)(211109153510W)(0000001740*s)(210929162521S)(0000005207*s)
+	(210903155307S)(0000001819*s)(191129101857W)(0000000426*s)(191029172333W)(0000001565*s)(191029135014W)(0000002151*s)(191018150311S)(0000000673*s)(191016153045S)(0000023958*s)(191016083319S)(0000062004*s)
+1-0:32.32.0(00015)
+1-0:52.32.0(00013)
+1-0:72.32.0(00013)
+1-0:32.36.0(00000)
+1-0:52.36.0(00000)
+1-0:72.36.0(00070)
+0-0:96.13.0()
+1-0:32.7.0(236.0*V)
+1-0:52.7.0(233.0*V)
+1-0:72.7.0(239.0*V)
+1-0:31.7.0(001*A)
+1-0:51.7.0(001*A)
+1-0:71.7.0(001*A)
+1-0:21.7.0(00.000*kW)
+1-0:41.7.0(00.000*kW)
+1-0:61.7.0(00.000*kW)
+1-0:22.7.0(00.075*kW)
+1-0:42.7.0(00.089*kW)
+1-0:62.7.0(00.226*kW)
+!1DF5
+]]></telegram>
+			</dsmr_main>
+		</protocols>
+	</module>
+	<gateway id='1fa49786110c4ebb90e2fd341d7e3cdf'>
+		<created_date>2019-12-28T14:21:40.385+01:00</created_date>
+		<modified_date>2023-02-15T15:55:26.387+01:00</modified_date>
+		<deleted_date/>
+		<name></name>
+		<description></description>
+		<enabled>true</enabled>
+		<firmware_locked>false</firmware_locked>
+		<prevent_default_update>false</prevent_default_update>
+		<last_reset_date>2019-12-28T14:21:40.385+01:00</last_reset_date>
+		<last_boot_date>2023-01-24T14:05:53.277+01:00</last_boot_date>
+		<vendor_name>Plugwise</vendor_name>
+		<vendor_model>smile</vendor_model>
+		<hardware_version>AME Smile 2.0 board</hardware_version>
+		<firmware_version>4.4.2</firmware_version>
+		<mac_address>C4930004B97E</mac_address>
+		<wifi_mac_address>C4930004B97C</wifi_mac_address>
+		<short_id>kqdqmscb</short_id>
+		<send_data>false</send_data>
+		<anonymous>false</anonymous>
+		<lan_ip>10.0.0.5</lan_ip>
+		<wifi_ip></wifi_ip>
+		<hostname>smile04b97e</hostname>
+		<time>2023-02-15T15:56:56+01:00</time>
+		<timezone>Europe/Amsterdam</timezone>
+		<ssh_relay>disabled</ssh_relay>
+		<project id='123306def5eb4172ae74435aea21e753'>
+			<name>Z -- Stock</name>
+			<description>Stock which was previously called fulfillment</description>
+			<is_default>false</is_default>
+			<visible_in_production>true</visible_in_production>
+			<deleted_date></deleted_date>
+			<created_date>2014-11-19T17:45:10+01:00</created_date>
+			<modified_date>2019-12-28T14:21:48.135+01:00</modified_date>
+		</project>
+		<gateway_environment id='2a5d97d5b8f047b29cf5c3cbd9269fc2'>
+			<electricity_consumption_off_peak_tariff/>
+			<electricity_production_single_tariff>0.4</electricity_production_single_tariff>
+			<electricity_production_peak_tariff/>
+			<electricity_production_off_peak_tariff/>
+			<modified_date>2022-12-01T05:47:56.412+01:00</modified_date>
+			<central_heating_year_of_manufacture/>
+			<tariff_region>NL</tariff_region>
+			<thermostat_brand/>
+			<housing_type>apartment</housing_type>
+			<housing_construction_period>unknown</housing_construction_period>
+			<household_adults>0</household_adults>
+			<household_children>0</household_children>
+			<currency>EUR</currency>
+			<savings_result_unit/>
+			<savings_result_value/>
+			<central_heating_brand/>
+			<central_heating_model/>
+			<latitude/>
+			<central_heating_installation_date/>
+			<longitude/>
+			<thermostat_model/>
+			<postal_code/>
+			<city/>
+			<country/>
+			<electricity_consumption_tariff_structure>single</electricity_consumption_tariff_structure>
+			<electricity_production_tariff_structure>single</electricity_production_tariff_structure>
+			<gas_consumption_tariff>0.74</gas_consumption_tariff>
+			<electricity_consumption_single_tariff>0.4</electricity_consumption_single_tariff>
+			<electricity_consumption_peak_tariff/>
+			<deleted_date></deleted_date>
+			<created_date>2023-02-14T05:48:37+01:00</created_date>
+			<modified_date>2022-12-01T05:47:56.412+01:00</modified_date>
+		</gateway_environment>
+		<features>
+			<remote_control id='25aeb0ff533f4029b11c3f099110d3a0'>
+				<grace_period/>
+				<validity_period/>
+				<valid_from></valid_from>
+				<valid_to></valid_to>
+				<activation_date>2019-11-21T16:49:49+01:00</activation_date>
+				<expiration_date>2038-01-19T04:14:07+01:00</expiration_date>
+				<deleted_date></deleted_date>
+				<created_date>2019-11-21T16:49:49+01:00</created_date>
+				<modified_date>2019-12-28T14:21:48.173+01:00</modified_date>
+			</remote_control>
+		</features>
+	</gateway>
+	<location id='46f36506f60049929aa3321b654878dc'>
+		<name>Home</name>
+		<description>A building with a smart meter.</description>
+		<type>building</type>
+		<created_date>2019-12-28T14:24:08.957+01:00</created_date>
+		<modified_date>2023-02-15T15:56:56.266+01:00</modified_date>
+		<deleted_date></deleted_date>
+		<preset>home</preset>
+		<clients/>
+		<appliances/>
+		<logs>
+			<cumulative_log id='0c131b9382194e5aba43f8113363d5e2'>
+				<type>gas_consumed</type>
+				<unit>m3</unit>
+				<updated_date>2022-07-30T10:55:00+02:00</updated_date>
+				<last_consecutive_log_date>2022-07-30T10:55:00+02:00</last_consecutive_log_date>
+				<interval/>
+				<gas_cumulative_meter id='8f4af03185764157afd27218a84ace74'/>
+				<period start_date="2022-07-30T10:55:00+02:00" end_date="2022-07-30T10:55:00+02:00">
+					<measurement log_date="2022-07-30T10:55:00+02:00">4129.74</measurement>
+				</period>
+			</cumulative_log>
+			<point_log id='0c19e799231547fb97b85934e412887c'>
+				<type>electricity_phase_two_consumed</type>
+				<unit>W</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<electricity_point_meter id='c9ded4243b2a4117b32cf1bd89edb5be'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00">0.00</measurement>
+				</period>
+			</point_log>
+			<point_log id='0c9e632fe1374c9f987cbe97b327bf1d'>
+				<type>electricity_phase_one_produced</type>
+				<unit>W</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<electricity_point_meter id='785d7619437246bbb13c5e61b8424b6b'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00">75.00</measurement>
+				</period>
+			</point_log>
+			<point_log id='2707e7f55ced481ba304dcf318b4f137'>
+				<type>electricity_phase_one_consumed</type>
+				<unit>W</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<electricity_point_meter id='785d7619437246bbb13c5e61b8424b6b'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00">0.00</measurement>
+				</period>
+			</point_log>
+			<interval_log id='2a63d6f706474ce9860e362e1fe87a72'>
+				<type>electricity_consumed</type>
+				<unit>Wh</unit>
+				<updated_date>2023-02-15T15:55:00+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:50:00+01:00</last_consecutive_log_date>
+				<interval>PT5M</interval>
+				<electricity_interval_meter id='f054c6ca90cd4b4abb210bda171c3da1'/>
+				<period start_date="2023-02-15T15:55:00+01:00" end_date="2023-02-15T15:55:00+01:00" interval="PT5M">
+					<measurement log_date="2023-02-15T15:55:00+01:00" tariff="nl_peak">0.00</measurement>
+					<measurement log_date="2023-02-15T15:55:00+01:00" tariff="nl_offpeak">0.00</measurement>
+				</period>
+			</interval_log>
+			<point_log id='308ce3df55804b8aa4dc5c7fba8e5a13'>
+				<type>voltage_phase_one</type>
+				<unit>V</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<voltage_meter id='ed218585ee79465b96e4f32c7dda1fe1'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00">236.00</measurement>
+				</period>
+			</point_log>
+			<point_log id='358ef9c4f7414580a2082c4d4899a37f'>
+				<type>electricity_produced</type>
+				<unit>W</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<electricity_point_meter id='f09863d0fe8448578ad7fe36f4c818cf'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00" tariff="nl_offpeak">0.00</measurement>
+					<measurement log_date="2023-02-15T15:56:56+01:00" tariff="nl_peak">391.00</measurement>
+				</period>
+			</point_log>
+			<interval_log id='448f2a85d91d4f60bdc16f50f569475f'>
+				<type>electricity_produced</type>
+				<unit>Wh</unit>
+				<updated_date>2023-02-15T15:55:00+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:50:00+01:00</last_consecutive_log_date>
+				<interval>PT5M</interval>
+				<electricity_interval_meter id='f054c6ca90cd4b4abb210bda171c3da1'/>
+				<period start_date="2023-02-15T15:55:00+01:00" end_date="2023-02-15T15:55:00+01:00" interval="PT5M">
+					<measurement log_date="2023-02-15T15:55:00+01:00" tariff="nl_peak">7.00</measurement>
+					<measurement log_date="2023-02-15T15:55:00+01:00" tariff="nl_offpeak">0.00</measurement>
+				</period>
+			</interval_log>
+			<cumulative_log id='4c4ff33fe38d42169458cec9f3979fee'>
+				<type>electricity_produced</type>
+				<unit>Wh</unit>
+				<updated_date>2023-02-15T15:56:00+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:00+01:00</last_consecutive_log_date>
+				<interval/>
+				<electricity_cumulative_meter id='5b42b310575d4a198827559b241639fe'/>
+				<period start_date="2023-02-15T15:56:00+01:00" end_date="2023-02-15T15:56:00+01:00">
+					<measurement log_date="2023-02-15T15:56:00+01:00" tariff="nl_peak">13660834.00</measurement>
+					<measurement log_date="2023-02-15T15:56:00+01:00" tariff="nl_offpeak">6556488.00</measurement>
+				</period>
+			</cumulative_log>
+			<interval_log id='60ab4470620247d7aab6ece025561ff0'>
+				<type>gas_consumed</type>
+				<unit>m3</unit>
+				<updated_date>2022-07-30T10:00:00+02:00</updated_date>
+				<last_consecutive_log_date>2022-07-30T09:00:00+02:00</last_consecutive_log_date>
+				<interval>PT1H</interval>
+				<gas_interval_meter id='695803fc9dd845ccb008148d266c1c2f'/>
+				<period start_date="2022-07-30T10:00:00+02:00" end_date="2022-07-30T10:00:00+02:00" interval="PT1H">
+					<measurement log_date="2022-07-30T10:00:00+02:00">0.00</measurement>
+				</period>
+			</interval_log>
+			<point_log id='8b339dc41562480596579127c40f6138'>
+				<type>electricity_phase_three_consumed</type>
+				<unit>W</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<electricity_point_meter id='ecc28e77fbfa4f7f852998358ca1a542'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00">0.00</measurement>
+				</period>
+			</point_log>
+			<point_log id='988b3643ed71435b8e7eb4c9aefd982a'>
+				<type>electricity_phase_three_produced</type>
+				<unit>W</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<electricity_point_meter id='ecc28e77fbfa4f7f852998358ca1a542'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00">226.00</measurement>
+				</period>
+			</point_log>
+			<point_log id='b0959d7270cd46b99c943fb6565d43ba'>
+				<type>voltage_phase_three</type>
+				<unit>V</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<voltage_meter id='d5694b70b4724263ba1adbee244be1b9'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00">239.00</measurement>
+				</period>
+			</point_log>
+			<point_log id='b8bced947b2f43269e225462bdd56b1b'>
+				<type>voltage_phase_two</type>
+				<unit>V</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<voltage_meter id='71be021dc36445519186c4e2d52abd12'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00">233.00</measurement>
+				</period>
+			</point_log>
+			<cumulative_log id='b969feb771484072bf3259374a022bfa'>
+				<type>electricity_consumed</type>
+				<unit>Wh</unit>
+				<updated_date>2023-02-15T15:56:00+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:00+01:00</last_consecutive_log_date>
+				<interval/>
+				<electricity_cumulative_meter id='5b42b310575d4a198827559b241639fe'/>
+				<period start_date="2023-02-15T15:56:00+01:00" end_date="2023-02-15T15:56:00+01:00">
+					<measurement log_date="2023-02-15T15:56:00+01:00" tariff="nl_peak">5000127.00</measurement>
+					<measurement log_date="2023-02-15T15:56:00+01:00" tariff="nl_offpeak">9086173.00</measurement>
+				</period>
+			</cumulative_log>
+			<point_log id='cb5991a238014cd9bc86ba3673e9155f'>
+				<type>electricity_phase_two_produced</type>
+				<unit>W</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<electricity_point_meter id='c9ded4243b2a4117b32cf1bd89edb5be'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00">89.00</measurement>
+				</period>
+			</point_log>
+			<point_log id='f2e1050669df41b6bf0d4c539edadd14'>
+				<type>electricity_consumed</type>
+				<unit>W</unit>
+				<updated_date>2023-02-15T15:56:56+01:00</updated_date>
+				<last_consecutive_log_date>2023-02-15T15:56:56+01:00</last_consecutive_log_date>
+				<interval/>
+				<electricity_point_meter id='f09863d0fe8448578ad7fe36f4c818cf'/>
+				<period start_date="2023-02-15T15:56:56+01:00" end_date="2023-02-15T15:56:56+01:00">
+					<measurement log_date="2023-02-15T15:56:56+01:00" tariff="nl_offpeak">0.00</measurement>
+					<measurement log_date="2023-02-15T15:56:56+01:00" tariff="nl_peak">0.00</measurement>
+				</period>
+			</point_log>
+		</logs>
+		<actuator_functionalities/>
+	</location>
+	<module id='9e4654cd6ae04550a4673807bc41337c'>
+		<vendor_name>Plugwise</vendor_name>
+		<vendor_model>Gateway</vendor_model>
+		<hardware_version>AME Smile 2.0 board</hardware_version>
+		<firmware_version></firmware_version>
+		<created_date>2019-12-28T14:21:40.581+01:00</created_date>
+		<modified_date>2019-12-28T14:21:44.562+01:00</modified_date>
+		<deleted_date></deleted_date>
+		<services>
+			<network_address id='05f5f7fd25694958a823f8e777a3ffdd' log_type='wlan_ip_address'>
+				<functionalities><point_log id='3dd0223a2c564b2ba0b0adfbcb0514e5'/></functionalities>
+			</network_address>
+			<network_state id='2259f1b4860d44829c0f43b9ddc49993' log_type='lan_state'>
+				<functionalities><point_log id='6b8cce05a46f4388ab6a86596192677a'/></functionalities>
+			</network_state>
+			<network_state id='4510922dfc554bf4a95eaeb33999d410' log_type='wlan_state'>
+				<functionalities><point_log id='192de012c83242be8fe2c0016f16778c'/></functionalities>
+			</network_state>
+			<network_address id='d10b9fca32db4913a318d5b90e1b4676' log_type='lan_ip_address'>
+				<functionalities><point_log id='19603566ac6a45979cf0debc1b6b31c3'/></functionalities>
+			</network_address>
+		</services>
+		<protocols>
+			<local_area_network id='730cff440fce49a19b506fb474693eb8'/>
+			<wireless_local_area_network id='cb922fc1e8df47e29f36ea6c5954498e'/>
+		</protocols>
+	</module>
+	<module id='3520ea3185724a42acc95bb1d39aa435'>
+		<vendor_name></vendor_name>
+		<vendor_model></vendor_model>
+		<hardware_version></hardware_version>
+		<firmware_version></firmware_version>
+		<created_date>2019-12-28T14:24:10.945+01:00</created_date>
+		<modified_date>2019-12-28T14:24:11.563+01:00</modified_date>
+		<deleted_date></deleted_date>
+		<services>
+			<gas_interval_meter id='695803fc9dd845ccb008148d266c1c2f' log_type='gas'>
+				<functionalities><interval_log id='60ab4470620247d7aab6ece025561ff0'/></functionalities>
+			</gas_interval_meter>
+			<gas_cumulative_meter id='8f4af03185764157afd27218a84ace74' log_type='gas'>
+				<functionalities><cumulative_log id='0c131b9382194e5aba43f8113363d5e2'/></functionalities>
+			</gas_cumulative_meter>
+		</services>
+		<protocols>
+			<dsmr_gas id='7235c4b59ef24722bd8c899109308942'>
+				<serial>G0059003922418819</serial>
+				<dsmr_main id='4192221cab3249a8a5629e61fb405b2f'/>
+			</dsmr_gas>
+		</protocols>
+	</module>
+</domain_objects>
 
 domain objects:
 <domain_objects>
